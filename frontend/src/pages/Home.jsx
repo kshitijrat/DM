@@ -6,6 +6,7 @@ const Home = () => {
         <div className="min-h-screen bg-gray-100">
             <Navbar />
             <div className="text-center py-16 px-6">
+                <h1 className="text-4xl font-bold text-gray-800 mb-4">Stay Alert, Stay Safe</h1>
                 <p className="text-gray-600 max-w-2xl mx-auto">Real-time disaster alerts and resource sharing to help communities during emergencies.</p>
             </div>
             <div className="flex justify-center gap-8 px-6 w-full max-w-7xl mx-auto pb-16">

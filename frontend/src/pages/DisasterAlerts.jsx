@@ -32,7 +32,7 @@ const DisasterAlerts = () => {
                 };
 
                 // Fetch weather based on user's location
-                const apiKey ="";
+                const apiKey ="9cfd85c582df09ab769763b0095ed07c";
                 const weatherRes = await fetch(
                     `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
                 );
