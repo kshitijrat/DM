@@ -19,6 +19,9 @@ import {
   Mountain,
 } from "lucide-react"
 import { toast } from "../components/ui/Toaster"
+import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
+import SafeZoneMap2 from "../components/SafeZoneMap2"
+import SafeZoneMap from "../components/SafeZoneMap"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -280,13 +283,13 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                 className="mt-6 bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 overflow-hidden"
               >
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.safeZones}</h2>
-                <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500 dark:text-gray-400">Map loading...</p>
-                </div>
+                <SafeZoneMap />
               </motion.div>
+              
             )}
           </div>
-
+          
+          
           {/* Right Column - Weather and Details */}
           <div>
             <motion.div
