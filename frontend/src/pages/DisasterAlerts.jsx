@@ -4,6 +4,7 @@ import DisasterChart from "../components/DisasterChart";
 import WeatherInfo from "../components/WeatherInfo";
 import SafeZoneMap from "../components/SafeZoneMap";
 import InfoCard from "../components/InfoCard";
+import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap";
 
 const DisasterAlerts = () => {
     const [dashboardData, setDashboardData] = useState({
@@ -13,54 +14,55 @@ const DisasterAlerts = () => {
         weather: null,
         alertsToday: null,
     });
+    const [coordinates, setCoordinates] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const updateWeatherFromChild = (weatherData) => {
+        const summary = `${weatherData.weather[0].main}, ${weatherData.main.temp}°C`;
+        setDashboardData((prev) => ({
+            ...prev,
+            weather: summary,
+        }));
+    };
+
     useEffect(() => {
-        const fetchDashboardData = async () => {
+        const fetchInitialData = async () => {
             try {
-                // Fetch user's location from ipapi.co
                 const locRes = await fetch("https://ipapi.co/json/");
                 const locData = await locRes.json();
 
-                const { latitude, longitude, city } = locData;
+                let { latitude, longitude, city } = locData;
 
-                const disasterData = {
-                    disastersDetected: 32,
-                    avgIntensity: "67%",
-                    mostAffectedArea: city || "Unknown",
-                    alertsToday: 12,
-                };
-
-                // Fetch weather based on user's location
-                const apiKey ="9cfd85c582df09ab769763b0095ed07c";
-                const weatherRes = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
-                );
-
-                if (!weatherRes.ok) {
-                    throw new Error("Weather API error");
+                if (!latitude || !longitude || window.location.hostname === "localhost") {
+                    latitude = 23.2599;
+                    longitude = 77.4126;
+                    city = "Bhopal";
                 }
 
-                const weatherData = await weatherRes.json();
-                const weatherSummary = `${weatherData.weather[0].main}, ${weatherData.main.temp}°C`;
+                setCoordinates({ latitude, longitude });
 
-                setDashboardData({
-                    ...disasterData,
-                    weather: weatherSummary,
-                });
-            } catch (error) {
-                console.error("Error fetching location/weather data:", error);
                 setDashboardData((prev) => ({
                     ...prev,
-                    weather: "Unavailable",
-                    mostAffectedArea: "Unknown",
+                    disastersDetected: 32,
+                    avgIntensity: "67%",
+                    mostAffectedArea: city,
+                    alertsToday: 12,
                 }));
+            } catch (error) {
+                console.error("Location error:", error);
+                setDashboardData({
+                    disastersDetected: 0,
+                    avgIntensity: "N/A",
+                    mostAffectedArea: "Unknown",
+                    weather: "Unavailable",
+                    alertsToday: 0,
+                });
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchDashboardData();
+        fetchInitialData();
     }, []);
 
     return (
@@ -87,8 +89,13 @@ const DisasterAlerts = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-8 py-8">
                 <DisasterChart />
-                <WeatherInfo />
+                <WeatherInfo
+                    externalLat={coordinates?.latitude}
+                    externalLon={coordinates?.longitude}
+                    setExternalWeather={updateWeatherFromChild}
+                />
                 <SafeZoneMap />
+                <Dumy_SafeZoneMap />
             </div>
         </div>
     );

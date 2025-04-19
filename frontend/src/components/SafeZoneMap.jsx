@@ -1,16 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix default icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
 
 const apiKey = "9cfd85c582df09ab769763b0095ed07c"; // Your OpenWeather API key
 
-// Define disaster conditions (for testing purposes)
 const isDisaster = (weather) => {
-    // Disaster simulation: Extremely high wind speed and heavy rain
-    const disasterWindThreshold = 30; // m/s (disaster wind speed)
-    const disasterRainThreshold = 50; // mm/h (disaster rain level)
+    const disasterWindThreshold = 30;
+    const disasterRainThreshold = 50;
     const wind = weather.wind.speed;
     const rain = weather.rain?.["1h"] || 0;
-
     return wind > disasterWindThreshold || rain > disasterRainThreshold;
 };
 
@@ -25,7 +33,6 @@ const fetchWeather = async (lat, lon) => {
     }
 };
 
-// Reverse geocoding to get location name (using Nominatim API)
 const fetchLocationName = async (lat, lon) => {
     try {
         const response = await axios.get(
@@ -38,42 +45,47 @@ const fetchLocationName = async (lat, lon) => {
 };
 
 const checkNearbyAreas = async (lat, lon) => {
-    const deltas = [0.05, 0.1, 0.15, 0.2]; // Latitude and longitude deltas to check nearby areas
-    const nearbyAreas = [];
+    const deltas = [0.05, 0.1, -0.05, -0.1];
+    const safe = [];
+    const unsafe = [];
 
     for (let deltaLat of deltas) {
         for (let deltaLon of deltas) {
-            // Check nearby locations by modifying lat and lon within a 40 km range
             const newLat = lat + deltaLat;
             const newLon = lon + deltaLon;
 
             const weather = await fetchWeather(newLat, newLon);
-            console.log(`Weather for lat: ${newLat}, lon: ${newLon}: `, weather);
+            if (!weather) continue;
 
-            if (weather && !isDisaster(weather)) { // Only return safe zones, avoid disaster zones
-                const areaName = await fetchLocationName(newLat, newLon);
-                nearbyAreas.push({
-                    name: areaName,
-                    lat: newLat,
-                    lon: newLon,
-                    windSpeed: weather.wind.speed,
-                    rain: weather.rain?.["1h"] || 0,
-                    temp: weather.main.temp,
-                    description: weather.weather[0].description,
-                });
+            const areaName = await fetchLocationName(newLat, newLon);
+            const zoneData = {
+                name: areaName,
+                lat: newLat,
+                lon: newLon,
+                windSpeed: weather.wind.speed,
+                rain: weather.rain?.["1h"] || 0,
+                temp: weather.main.temp,
+                description: weather.weather[0].description,
+            };
+
+            if (isDisaster(weather)) {
+                unsafe.push(zoneData);
+            } else {
+                safe.push(zoneData);
             }
         }
     }
-    console.log('Nearby safe zones: ', nearbyAreas); // Log to see the safe zones found
-    return nearbyAreas;
+
+    return { safe, unsafe };
 };
 
 const SafeZoneMap = () => {
     const [status, setStatus] = useState("Checking safety...");
     const [location, setLocation] = useState(null);
     const [safeZones, setSafeZones] = useState([]);
+    const [unsafeZones, setUnsafeZones] = useState([]);
     const [currentLocationName, setCurrentLocationName] = useState({});
-    
+
     useEffect(() => {
         const determineSafety = async () => {
             if (!navigator.geolocation) {
@@ -86,20 +98,20 @@ const SafeZoneMap = () => {
                     const { latitude, longitude } = coords;
                     setLocation({ lat: latitude, lon: longitude });
 
-                    // Fetch the current location's name
                     const currentLocation = await fetchLocationName(latitude, longitude);
                     setCurrentLocationName(currentLocation);
-                    console.log("current location info: ", currentLocation);
 
-                    // First, fetch weather for the current location
                     const currentWeather = await fetchWeather(latitude, longitude);
+
                     if (currentWeather && !isDisaster(currentWeather)) {
                         setStatus("You are in a safe zone.");
                     } else {
                         setStatus("Disaster conditions detected. Searching for safe zones nearby...");
-                        const nearbyAreas = await checkNearbyAreas(latitude, longitude);
-                        if (nearbyAreas.length > 0) {
-                            setSafeZones(nearbyAreas);
+                        const { safe, unsafe } = await checkNearbyAreas(latitude, longitude);
+                        setSafeZones(safe);
+                        setUnsafeZones(unsafe);
+
+                        if (safe.length > 0) {
                             setStatus("Safest zones found nearby:");
                         } else {
                             setStatus("No safe zones found nearby during disaster.");
@@ -114,44 +126,62 @@ const SafeZoneMap = () => {
     }, []);
 
     return (
-        <div className="bg-white shadow-lg rounded-lg p-5">
-            <h2 className="text-xl font-bold text-gray-700 mb-4">Safe Zone Status</h2>
-            <p className="text-gray-600 mb-4">{status}</p>
+        <div className="p-4">
+            <h2 className="text-xl font-bold mb-2">Safe Zone Map</h2>
+            <p>{status}</p>
 
             {location && (
-                <div className="text-sm text-gray-500">
-                    <strong>Current Location: </strong>
-                    {/* Displaying the current location name */}
-                    {currentLocationName ? (
-                        <div>
-                            <p>Amenity: {currentLocationName?.amenity}</p>
-                            <p>Road: {currentLocationName?.road}</p>
-                            <p>City: {currentLocationName?.city}</p>
-                            <p>District: {currentLocationName?.city_district}</p>
-                            <p>State: {currentLocationName?.state}</p>
-                            <p>Country: {currentLocationName?.country}</p>
-                        </div>
-                    ) : (
-                        <p>Location not found</p>
-                    )}
-                    <p>
-                        Coordinates: {location.lat.toFixed(2)}, {location.lon.toFixed(2)}
-                    </p>
-                </div>
-            )}
+                <MapContainer
+                    center={[location.lat, location.lon]}
+                    zoom={8}
+                    style={{ height: '500px', width: '100%' }}
+                >
+                    <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution="&copy; OpenStreetMap contributors"
+                    />
 
-            {safeZones.length > 0 && (
-                <div className="mt-4">
-                    <h3 className="font-semibold text-gray-700">Nearby Safe Zones:</h3>
-                    <ul className="list-disc list-inside text-gray-600">
-                        {safeZones.map((zone, index) => (
-                            <li key={index}>
-                                {zone.name} (Lat: {zone.lat.toFixed(2)}, Lon: {zone.lon.toFixed(2)}) - 
-                                Temp: {zone.temp}°C, Wind: {zone.windSpeed} m/s, Rain: {zone.rain} mm/h
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                    {/* Current location */}
+                    <Marker position={[location.lat, location.lon]}>
+                        <Popup>You are here</Popup>
+                    </Marker>
+
+                    {/* Safe Zones */}
+                    {safeZones.map((zone, i) => (
+                        <Marker
+                            key={`safe-${i}`}
+                            position={[zone.lat, zone.lon]}
+                            icon={L.divIcon({
+                                className: 'safe-marker',
+                                html: `<div style="background:green;border-radius:50%;width:16px;height:16px;"></div>`,
+                            })}
+                        >
+                            <Popup>
+                                {zone.name.city || "Unknown"}, {zone.temp}°C
+                                <br />
+                                Wind: {zone.windSpeed} m/s
+                            </Popup>
+                        </Marker>
+                    ))}
+
+                    {/* Unsafe Zones */}
+                    {unsafeZones.map((zone, i) => (
+                        <Marker
+                            key={`unsafe-${i}`}
+                            position={[zone.lat, zone.lon]}
+                            icon={L.divIcon({
+                                className: 'unsafe-marker',
+                                html: `<div style="background:red;border-radius:50%;width:16px;height:16px;"></div>`,
+                            })}
+                        >
+                            <Popup>
+                                {zone.name.city || "Unknown"}, {zone.temp}°C
+                                <br />
+                                Wind: {zone.windSpeed} m/s
+                            </Popup>
+                        </Marker>
+                    ))}
+                </MapContainer>
             )}
         </div>
     );

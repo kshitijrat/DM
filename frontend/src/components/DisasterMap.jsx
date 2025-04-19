@@ -20,7 +20,8 @@ const DisasterMap = () => {
         });
     }, []);
 
-    return <div ref={mapRef} className="w-full h-96 rounded-lg shadow-lg"></div>;
+    return <div ref={mapRef} className="w-full h-96 rounded-lg shadow-lg">
+    </div>;
 };
 
 export default DisasterMap;
