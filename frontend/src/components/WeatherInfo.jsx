@@ -1,17 +1,25 @@
-"use client"
-
-import { useEffect, useState } from "react"
+import React, { useEffect, useState, useMemo } from "react"
 import axios from "axios"
 import { motion } from "framer-motion"
-import { Thermometer, Droplets, Wind, Gauge, CloudRain, Sunrise, Sunset, Cloud } from "lucide-react"
+import {
+  Thermometer,
+  Droplets,
+  Wind,
+  Gauge,
+  CloudRain,
+  Sunrise,
+  Sunset,
+  Cloud,
+} from "lucide-react"
 
 const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language }) => {
   const [weather, setWeather] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [weatherFetched, setWeatherFetched] = useState(false)
 
-  // Translations
-  const translations = {
+  // ✅ Memoized Translations
+  const translations = useMemo(() => ({
     en: {
       title: "Current Weather",
       location: "Location",
@@ -48,9 +56,9 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
       permissionDenied: "अनुमति अस्वीकृत या स्थान अनुपलब्ध।",
       notSupported: "इस ब्राउज़र द्वारा जियोलोकेशन समर्थित नहीं है।",
     },
-  }
+  }), [])
 
-  const t = translations[language] || translations.en
+  const t = useMemo(() => translations[language] || translations.en, [language, translations])
 
   useEffect(() => {
     const fetchWeather = async (lat, lon) => {
@@ -60,17 +68,16 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`,
         )
         setWeather(response.data)
-        if (setExternalWeather) {
-          setExternalWeather(response.data) // send to parent
-        }
-        setLoading(false)
+        setWeatherFetched(true)
+        if (setExternalWeather) setExternalWeather(response.data)
       } catch (err) {
         setError(t.error)
+      } finally {
         setLoading(false)
       }
     }
 
-    if (externalLat && externalLon) {
+    if (externalLat != null && externalLon != null) {
       fetchWeather(externalLat, externalLon)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -84,16 +91,15 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
       setError(t.notSupported)
       setLoading(false)
     }
-  }, [externalLat, externalLon, setExternalWeather, language, t])
+  }, [externalLat, externalLon, setExternalWeather, language])
 
-  // Get wind direction as text
   const getWindDirection = (degrees) => {
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     const index = Math.round(degrees / 45) % 8
     return directions[index]
   }
 
-  if (loading) {
+  if (!weatherFetched && loading) {
     return (
       <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg p-6">
         <div className="flex flex-col items-center">

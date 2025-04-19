@@ -287,8 +287,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               
             )}
 
-            {/* Dumy map show */}
-            
+            {/* Dumy map show */}    
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
