@@ -61,11 +61,11 @@ const Dumy_SafeZoneMap = () => {
   }, [])
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-2">🧪 Dummy Disaster Simulation</h2>
-      <div className="mb-3 p-2 bg-yellow-100 border border-yellow-400 rounded">{status}</div>
+    <div className="p-4j ">
+      <h2 className="text-xl text-white font-bold mb-2">🧪 Dummy Disaster Simulation</h2>
+      <div className="mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded">{status}</div>
 
-      <MapContainer center={[location.lat, location.lon]} zoom={8} style={{ height: "500px", width: "100%" }}>
+      <MapContainer center={[location.lat, location.lon]} zoom={8} style={{ height: "300px", width: "90%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"

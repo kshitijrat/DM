@@ -275,33 +275,61 @@ const DisasterAlerts = ({ language, setLanguage }) => {
             {/* show real safe zone map  */}
             {showMap && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mt-6 bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 overflow-hidden"
+                className="mt-20 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
               >
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.safeZones}</h2>
+                {/* Legend */}
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Safe Zone</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Unsafe Zone</span>
+                  </div>
+                </div>
                 <SafeZoneMap />
               </motion.div>
-              
+
             )}
 
-            {/* Dumy map show */}    
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mt-6 bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 overflow-hidden"
-              >
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4"> Dumy Map {t.safeZones}</h2>
-                <Dumy_SafeZoneMap />
-              </motion.div>
-      
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-20 z-1 bg-white border-2 dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
+            >
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                Dumy Map {t.safeZones}
+              </h2>
+
+              {/* Legend */}
+              <div className="flex items-center gap-6 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Safe Zone</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Unsafe Zone</span>
+                </div>
+              </div>
+
+              {/* Map */}
+              <Dumy_SafeZoneMap />
+            </motion.div>
+
+
+
           </div>
-          
-          
+
+
           {/* Right Column - Weather and Details */}
           <div>
             <motion.div
