@@ -230,9 +230,9 @@ const ProvideResources = ({ language, setLanguage }) => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
       <Navbar language={language} setLanguage={setLanguage} />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-semibold text-center mb-4">{t.title}</h1>
-        <p className="text-gray-600 text-center mb-6">{t.subtitle}</p>
+      <div  className="min-h-screen bg-gray-900 py-12 px-4 text-white">
+        <h1 className="text-3xl text-white font-semibold text-center mb-4">{t.title}</h1>
+        <p className="text-gray-300 text-center mb-6">{t.subtitle}</p>
 
         <div className="flex justify-center mb-8">
           <button
@@ -245,7 +245,7 @@ const ProvideResources = ({ language, setLanguage }) => {
           </button>
           <button
             className={`px-6 py-2 rounded-full font-semibold ${
-              activeTab === "requests" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
+              activeTab === "requests" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
             }`}
             onClick={() => setActiveTab("requests")}
           >
@@ -259,73 +259,73 @@ const ProvideResources = ({ language, setLanguage }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-lg mx-auto bg-white shadow-md rounded-lg p-6"
+            className="max-w-lg mx-auto bg-gray-900/90 border-1 text-white shadow-md rounded-lg p-6"
           >
             <h2 className="text-2xl font-semibold text-center mb-4">{t.formTitle}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
+              <div className="text-white">
+                <label htmlFor="name" className="block  text-sm font-bold mb-2">
                   {t.nameLabel}
                 </label>
                 <input
                   type="text"
                   id="name"
                   placeholder={t.namePlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="phone" className="block  text-sm font-bold mb-2">
                   {t.phoneLabel}
                 </label>
                 <input
                   type="tel"
                   id="phone"
                   placeholder={t.phonePlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="email" className="block  text-sm font-bold mb-2">
                   {t.emailLabel}
                 </label>
                 <input
                   type="email"
                   id="email"
                   placeholder={t.emailPlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="location" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="location" className="block  text-sm font-bold mb-2">
                   {t.locationLabel}
                 </label>
                 <input
                   type="text"
                   id="location"
                   placeholder={t.locationPlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="resourceType" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="resourceType" className="block  text-sm font-bold mb-2">
                   {t.resourceTypeLabel}
                 </label>
                 <select
                   id="resourceType"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.resourceType}
                   onChange={(e) => setFormData({ ...formData, resourceType: e.target.value })}
                 >
@@ -336,26 +336,26 @@ const ProvideResources = ({ language, setLanguage }) => {
                 </select>
               </div>
               <div>
-                <label htmlFor="quantity" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="quantity" className="block  text-sm font-bold mb-2">
                   {t.quantityLabel}
                 </label>
                 <input
                   type="text"
                   id="quantity"
                   placeholder={t.quantityPlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label htmlFor="availability" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="availability" className="block  text-sm font-bold mb-2">
                   {t.availabilityLabel}
                 </label>
                 <select
                   id="availability"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.availability}
                   onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
                 >
@@ -366,13 +366,13 @@ const ProvideResources = ({ language, setLanguage }) => {
                 </select>
               </div>
               <div>
-                <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="description" className="block  text-sm font-bold mb-2">
                   {t.descriptionLabel}
                 </label>
                 <textarea
                   id="description"
                   placeholder={t.descriptionPlaceholder}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows="3"

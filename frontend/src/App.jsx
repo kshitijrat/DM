@@ -8,9 +8,9 @@ import Signup from "./pages/Signup"
 import DisasterAlerts from "./pages/DisasterAlerts"
 import SeekResources from "./pages/SeekResources"
 import ProvideResources from "./pages/ProvideResources"
-import ModernNavbar from "./components/ModernNavbar"
 import Footer from "./components/Footer"
 import ScrollToTop from "./components/ScrollToTop"
+import Navbar from "./components/Navbar"
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -23,7 +23,8 @@ const App = () => {
     <Router>
       <ScrollToTop />
       <div className="flex flex-col min-h-screen">
-        <ModernNavbar onLanguageChange={handleLanguageChange} />
+        {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
+        <Navbar />
         <div className="flex-grow pt-16">
           <Routes>
             <Route path="/" element={<Home />} />

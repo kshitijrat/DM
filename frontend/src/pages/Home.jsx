@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertTriangle, MapPin, Wind, Users } from "lucide-react";
 import { toast } from "../components/ui/Toaster";
 import { motion } from "framer-motion";
@@ -73,13 +71,13 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gray-900 py-12 px-4 text-white">
       <div className="max-w-6xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-4xl font-bold text-center text-gray-800 mb-6"
+          className="text-4xl font-bold text-center mb-6"
         >
           DisasterAlert – Stay Aware. Stay Safe.
         </motion.h1>
@@ -88,7 +86,7 @@ const Home = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-center text-gray-600 mb-12 text-lg"
+          className="text-center text-gray-400 mb-12 text-lg"
         >
           Empowering you with real-time alerts and safety insights to tackle
           emergencies effectively.
@@ -102,24 +100,22 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+              className="bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 text-sm">{feature.description}</p>
+              <p className="text-gray-400 text-sm">{feature.description}</p>
             </motion.div>
           ))}
         </div>
 
         {/* Active Disasters */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Ongoing Disasters
-        </h2>
+        <h2 className="text-2xl font-semibold mb-4">Ongoing Disasters</h2>
 
         {isLoading ? (
-          <p className="text-gray-500 text-center">Loading latest updates...</p>
+          <p className="text-gray-400 text-center">Loading latest updates...</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {activeDisasters.map((disaster) => (
@@ -128,21 +124,19 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="bg-red-50 border border-red-200 rounded-xl p-5 shadow-md"
+                className="bg-red-800 border border-red-700 rounded-xl p-5 shadow-md"
               >
-                <h3 className="text-lg font-bold text-red-600">
-                  {disaster.type}
-                </h3>
-                <p className="text-gray-700">
+                <h3 className="text-lg font-bold text-red-400">{disaster.type}</h3>
+                <p className="text-gray-300">
                   <strong>Location:</strong> {disaster.location}
                 </p>
-                <p className="text-gray-700">
+                <p className="text-gray-300">
                   <strong>Severity:</strong> {disaster.severity}
                 </p>
-                <p className="text-gray-700">
+                <p className="text-gray-300">
                   <strong>Affected:</strong> {disaster.affected}
                 </p>
-                <p className="text-gray-700">
+                <p className="text-gray-300">
                   <strong>Reported:</strong> {disaster.time}
                 </p>
               </motion.div>

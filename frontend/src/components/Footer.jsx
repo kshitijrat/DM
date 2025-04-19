@@ -67,12 +67,12 @@ const Footer = ({ language }) => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t.quickLinks}</h3>
+            <h3 className="text-lg text-white font-semibold mb-4">{t.quickLinks}</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/"
-                  className="text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="text-white dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   {t.home}
                 </Link>
@@ -106,7 +106,7 @@ const Footer = ({ language }) => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t.contact}</h3>
+            <h3 className="text-lg text-white font-semibold mb-4">{t.contact}</h3>
             <ul className="space-y-2">
               <li className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
                 <Mail size={16} />
@@ -125,7 +125,7 @@ const Footer = ({ language }) => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">{t.about}</h3>
+            <h3 className="text-lg text-white font-semibold mb-4">{t.about}</h3>
             <form className="space-y-2">
               <input
                 type="email"

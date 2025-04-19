@@ -84,7 +84,6 @@ const DisasterAlerts = ({ language, setLanguage }) => {
       currentLocation: "वर्तमान स्थान",
     },
   }
-
   const t = translations[language] || translations.en
 
   // Sample disaster data
@@ -149,7 +148,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           setDashboardData({
             disastersDetected: 32,
             avgIntensity: "67%",
-            mostAffectedArea: "Bhopal",
+            mostAffectedArea: "Chandwasa",
             weather: "Loading...",
             alertsToday: 12,
           })
@@ -163,6 +162,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
         }, 1500)
       } catch (error) {
         console.error("Error:", error)
+        alert("Failed to fetch data. Please try again later.")
         setDashboardData({
           disastersDetected: 0,
           avgIntensity: "N/A",
@@ -235,7 +235,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.disasterTypes}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.disasterTypes} (Dumy)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {disasterTypes.map((disaster) => (
                   <motion.div
