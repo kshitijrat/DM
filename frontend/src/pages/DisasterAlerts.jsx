@@ -19,6 +19,7 @@ import {
   Mountain,
 } from "lucide-react"
 import { toast } from "../components/ui/Toaster"
+import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
 import SafeZoneMap from "../components/SafeZoneMap"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
@@ -271,7 +272,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               </button>
             </div>
 
-            {/* Map (conditionally rendered) */}
+            {/* show real safe zone map  */}
             {showMap && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -285,6 +286,20 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               </motion.div>
               
             )}
+
+            {/* Dumy map show */}
+            
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mt-6 bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 overflow-hidden"
+              >
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4"> Dumy Map {t.safeZones}</h2>
+                <Dumy_SafeZoneMap />
+              </motion.div>
+      
           </div>
           
           
