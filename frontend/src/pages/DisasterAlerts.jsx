@@ -19,8 +19,6 @@ import {
   Mountain,
 } from "lucide-react"
 import { toast } from "../components/ui/Toaster"
-import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
-import SafeZoneMap2 from "../components/SafeZoneMap2"
 import SafeZoneMap from "../components/SafeZoneMap"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
