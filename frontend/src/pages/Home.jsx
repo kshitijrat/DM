@@ -39,7 +39,7 @@ const Home = () => {
       setIsLoading(false);
 
       // Welcome toast
-      toast("Welcome to DisasterAlert! Stay informed and safe.", "info");
+      // toast("Welcome to DisasterAlert! Stay informed and safe.", "info");
     }, 1500);
   }, []);
 

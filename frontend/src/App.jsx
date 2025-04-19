@@ -11,6 +11,7 @@ import ProvideResources from "./pages/ProvideResources"
 import Footer from "./components/Footer"
 import ScrollToTop from "./components/ScrollToTop"
 import Navbar from "./components/Navbar"
+import MapIcon from "./components/MapIcon"
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -27,6 +28,7 @@ const App = () => {
         <Navbar />
         <div className="flex-grow pt-16">
           <Routes>
+          
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -34,9 +36,11 @@ const App = () => {
             <Route path="/seek-resources" element={<SeekResources />} />
             <Route path="/provide-resources" element={<ProvideResources />} />
           </Routes>
+          <MapIcon />
         </div>
         <Footer language={language} />
       </div>
+      
     </Router>
   )
 }

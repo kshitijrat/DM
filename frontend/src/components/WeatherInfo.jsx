@@ -72,6 +72,7 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
         if (setExternalWeather) setExternalWeather(response.data)
       } catch (err) {
         setError(t.error)
+        console.log(err)
       } finally {
         setLoading(false)
       }

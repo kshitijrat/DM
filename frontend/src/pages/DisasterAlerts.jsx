@@ -156,9 +156,9 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           setLoading(false)
 
           // Show alert notification
-          setTimeout(() => {
-            toast("⚠️ New flood warning detected in Mumbai region!", "warning")
-          }, 3000)
+          // setTimeout(() => {
+          //   toast("⚠️ New flood warning detected in Mumbai region!", "warning")
+          // }, 1000)
         }, 1500)
       } catch (error) {
         console.error("Error:", error)
