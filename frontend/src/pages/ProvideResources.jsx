@@ -286,5 +286,4 @@ const ProvideResources = ({ language, setLanguage }) => {
     </motion.div>
   );
 };
-
 export default ProvideResources;
