@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const Alert = require("../models/Alert");
+const Resource = require("../models/Resource");
 
-// Get all alerts
+
 router.get("/", async (req, res) => {
     const alerts = await Alert.find();
     res.json(alerts);
 });
+
 
 // Create an alert
 router.post("/", async (req, res) => {

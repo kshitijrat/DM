@@ -6,7 +6,6 @@ import { X } from "lucide-react"
 export const Toaster = () => {
   const [toasts, setToasts] = useState([])
 
-  // Listen for toast events
   useEffect(() => {
     const handleToast = (event) => {
       const { message, type = "info", duration = 5000 } = event.detail
@@ -14,7 +13,6 @@ export const Toaster = () => {
       const id = Date.now()
       setToasts((prev) => [...prev, { id, message, type, duration }])
 
-      // Auto remove
       setTimeout(() => {
         setToasts((prev) => prev.filter((toast) => toast.id !== id))
       }, duration)
@@ -33,7 +31,12 @@ export const Toaster = () => {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
       {toasts.map((toast) => (
-        <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+        />
       ))}
     </div>
   )
@@ -55,8 +58,25 @@ const Toast = ({ message, type, onClose }) => {
 
   return (
     <div className={`rounded-lg border-l-4 p-4 shadow-md backdrop-blur-sm ${getTypeStyles()} animate-slide-up`}>
-      <div className="flex items-start">
-        <div className="flex-1 mr-2">{message}</div>
+      <div className="flex items-start justify-between">
+        <div className="flex-1 mr-2">
+          {typeof message === 'string' ? (
+            message
+          ) : (
+            <div>
+              {message.title && <div className="font-semibold">{message.title}</div>}
+              {message.description && <div className="text-sm">{message.description}</div>}
+              {message.action && (
+                <button
+                  className="mt-2 text-sm underline text-blue-600 hover:text-blue-800"
+                  onClick={message.action.onClick}
+                >
+                  {message.action.label}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <button
           onClick={onClose}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -73,6 +93,6 @@ export const toast = (message, type = "info", duration = 5000) => {
   window.dispatchEvent(
     new CustomEvent("toast", {
       detail: { message, type, duration },
-    }),
+    })
   )
 }
