@@ -97,7 +97,7 @@ const ProvideResources = ({ language, setLanguage }) => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/resources/add-resource", formData);
+      const res = await axios.post("http://localhost:5000/api/provide/add-resource", formData);
 
       setFormData({
         name: "",

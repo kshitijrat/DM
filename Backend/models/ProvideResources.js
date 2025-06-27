@@ -15,4 +15,4 @@ const ProvideResource = new mongoose.Schema({
     description: { type: String } // changed from `additional`
 });
 
-module.exports = mongoose.model("Resources", ProvideResource);
+module.exports = mongoose.model("ProvideResources", ProvideResource);

@@ -14,7 +14,8 @@ connectDB();
 // Routes
 app.use("/api/users", require("./routes/UserRoutes"));
 app.use("/api/alerts", require("./routes/alertRoutes"));
-app.use("/api/resources", resourceRoute);
+app.use('/api/seek', require('./routes/seekresource'));
+app.use("/api/provide", resourceRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
