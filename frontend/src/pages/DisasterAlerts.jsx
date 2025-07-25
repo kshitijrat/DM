@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar"
 import DisasterChart from "../components/DisasterChart"
 import WeatherInfo from "../components/WeatherInfo"
 import InfoCard from "../components/InfoCard"
+import Typed from 'typed.js'
 import {
   AlertTriangle,
   Thermometer,
@@ -30,10 +31,15 @@ const DisasterAlerts = ({ language, setLanguage }) => {
     weather: null,
     alertsToday: null,
   })
+
   const [coordinates, setCoordinates] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeDisaster, setActiveDisaster] = useState(null)
   const [showMap, setShowMap] = useState(false)
+
+  // New state: earthquakes & nearbyDisasters count
+  const [earthquakes, setEarthquakes] = useState([])
+  const [nearbyDisasters, setNearbyDisasters] = useState([])
 
   // Translations
   const translations = {
@@ -59,6 +65,8 @@ const DisasterAlerts = ({ language, setLanguage }) => {
       hideMap: "Hide Map",
       weatherInfo: "Weather Information",
       currentLocation: "Current Location",
+      nearbyDisasterAlert: "Nearby Disaster Alert",
+      noNearbyDisaster: "You are in safe zone",
     },
     hi: {
       title: "लाइव आपदा निगरानी डैशबोर्ड",
@@ -82,11 +90,13 @@ const DisasterAlerts = ({ language, setLanguage }) => {
       hideMap: "मानचित्र छिपाएं",
       weatherInfo: "मौसम की जानकारी",
       currentLocation: "वर्तमान स्थान",
+      nearbyDisasterAlert: "आपके आस-पास आपदा का अलर्ट",
+      noNearbyDisaster: "आपके स्थान के आसपास पिछले 24 घंटे में कोई आपदा नहीं पाई गई।",
     },
   }
   const t = translations[language] || translations.en
 
-  // Sample disaster data
+  // Sample disaster data (unchanged)
   const disasterTypes = [
     {
       id: 1,
@@ -130,6 +140,43 @@ const DisasterAlerts = ({ language, setLanguage }) => {
     },
   ]
 
+  useEffect(() => {
+    const titles = {
+      strings: ["Worldwide Disaster Info",
+        "Real-time Safety Alerts",
+        "24*7 Monitoring"],
+      typeSpeed: 40,
+    };
+    const typed = new Typed('#title', titles);
+    return () => {
+      typed.destroy();
+    }
+  }, [])
+  
+
+  const subtitles = [
+    t.subtitle,
+    "Stay informed with latest disaster updates.",
+    "Protect yourself with live alerts.",
+    "Your safety, our priority.",
+  ];
+
+  // Helper: Calculate distance between two lat/lon points in km
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180
+    const dLon = ((lon2 - lon1) * Math.PI) / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
+  }
+
+  // Update weather summary from WeatherInfo component
   const updateWeatherFromChild = (weatherData) => {
     const summary = `${weatherData.weather[0].main}, ${weatherData.main.temp}°C`
     setDashboardData((prev) => ({
@@ -138,28 +185,57 @@ const DisasterAlerts = ({ language, setLanguage }) => {
     }))
   }
 
+  // Get user coordinates on mount
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      toast("Geolocation not supported", "error")
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoordinates({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        })
+      },
+      (err) => {
+        toast("Could not get your location", "error")
+      }
+    )
+  }, [])
+
+  // Fetch earthquake data & update dashboardData
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Simulate API call
-        setTimeout(() => {
-          setCoordinates({ latitude: 23.2599, longitude: 77.4126 })
+        const res = await fetch(
+          "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+        )
+        const data = await res.json()
 
-          setDashboardData({
-            disastersDetected: 32,
-            avgIntensity: "67%",
-            mostAffectedArea: "Chandwasa",
-            weather: "Loading...",
-            alertsToday: 12,
-          })
+        const earthquakeCount = data.features.length
+        const mostRecent = data.features[0]?.properties?.place || "Unknown"
 
-          setLoading(false)
+        setEarthquakes(data.features)
 
-          // Show alert notification
-          // setTimeout(() => {
-          //   toast("⚠️ New flood warning detected in Mumbai region!", "warning")
-          // }, 1000)
-        }, 1500)
+        // Calculate average magnitude from real data
+        const magnitudes = data.features
+          .map((quake) => quake.properties.mag)
+          .filter((mag) => mag !== null && !isNaN(mag))
+
+        const avgMag =
+          magnitudes.reduce((sum, val) => sum + val, 0) / magnitudes.length || 0
+
+        setDashboardData({
+          disastersDetected: earthquakeCount,
+          avgIntensity: avgMag.toFixed(4), // real average magnitude (e.g., 4.32)
+          mostAffectedArea: mostRecent,
+          weather: "loading...", // Will update later via WeatherInfo
+          alertsToday: earthquakeCount,
+        })
+
+        setLoading(false)
       } catch (error) {
         console.error("Error:", error)
         alert("Failed to fetch data. Please try again later.")
@@ -173,9 +249,27 @@ const DisasterAlerts = ({ language, setLanguage }) => {
         setLoading(false)
       }
     }
-
     fetchInitialData()
   }, [])
+
+
+  // Whenever coordinates or earthquakes change, check for nearby disasters within 100 km
+  useEffect(() => {
+    if (!coordinates || earthquakes.length === 0) return
+
+    const nearby = earthquakes.filter((quake) => {
+      const [lon, lat] = quake.geometry.coordinates // USGS format: [lon, lat, depth]
+      const distance = getDistanceFromLatLonInKm(
+        coordinates.latitude,
+        coordinates.longitude,
+        lat,
+        lon
+      )
+      return distance <= 100 // 100 km radius
+    })
+
+    setNearbyDisasters(nearby)
+  }, [coordinates, earthquakes])
 
   const handleDisasterClick = (disaster) => {
     setActiveDisaster(disaster)
@@ -193,8 +287,14 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">{t.title}</h1>
-          <p className="text-gray-600 dark:text-gray-300 text-lg mt-2">{t.subtitle}</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">
+            {/* <Typewriter texts={titles} typingSpeed={20} deletingSpeed={15} pauseTime={50} /> */}
+            <span id="title"></span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 text-lg mt-2">
+            <span id="subtitle"></span>
+            {/* <Typewriter texts={subtitles} typingSpeed={30} deletingSpeed={15} pauseTime={0} /> */}
+          </p>
         </motion.div>
 
         {/* Info Cards */}
@@ -203,7 +303,9 @@ const DisasterAlerts = ({ language, setLanguage }) => {
             <div className="col-span-full flex justify-center items-center py-8">
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-300">{t.loadingData}</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-300">
+                  {t.loadingData}
+                </p>
               </div>
             </div>
           ) : (
@@ -214,13 +316,62 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                 icon={AlertTriangle}
                 color="red"
               />
-              <InfoCard title={t.avgIntensity} value={dashboardData.avgIntensity} icon={TrendingUp} color="orange" />
-              <InfoCard title={t.mostAffected} value={dashboardData.mostAffectedArea} icon={MapPin} color="yellow" />
-              <InfoCard title={t.weather} value={dashboardData.weather} icon={Thermometer} color="blue" />
-              <InfoCard title={t.alertsToday} value={dashboardData.alertsToday} icon={Bell} color="purple" />
+              <InfoCard
+                title={t.avgIntensity}
+                value={dashboardData.avgIntensity}
+                icon={TrendingUp}
+                color="orange"
+              />
+              <InfoCard
+                title={t.mostAffected}
+                value={dashboardData.mostAffectedArea}
+                icon={MapPin}
+                color="yellow"
+              />
+              <InfoCard
+                title={t.alertsToday}
+                value={dashboardData.alertsToday}
+                icon={Bell}
+                color="purple"
+              />
+              {/* New InfoCard for Nearby Disasters */}
+              <InfoCard
+                title={t.nearbyDisasterAlert}
+                value={
+                  nearbyDisasters.length > 0
+                    ? `${nearbyDisasters.length} disaster(s) nearby!`
+                    : t.noNearbyDisaster
+                }
+                icon={AlertTriangle}
+                color={nearbyDisasters.length > 0 ? "red" : "green"}
+              />
             </>
           )}
         </div>
+
+        {/* Show message for nearby disasters below cards */}
+        {!loading && (
+          <div
+            className={`mb-8 text-center font-semibold text-lg ${nearbyDisasters.length > 0 ? "text-red-600" : "text-green-600"
+              }`}
+          >
+            {nearbyDisasters.length > 0 ? (
+              <>
+                ⚠️ {nearbyDisasters.length} disaster(s) detected within 100 km of
+                your location.
+                <ul className="mt-2 list-disc list-inside text-sm max-w-md mx-auto text-gray-700 dark:text-gray-300">
+                  {nearbyDisasters.map((quake) => (
+                    <li key={quake.id}>
+                      {quake.properties.place} — Magnitude: {quake.properties.mag}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              t.noNearbyDisaster
+            )}
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -235,7 +386,9 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.disasterTypes} (Dumy)</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                {t.disasterTypes} (Dumy)
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {disasterTypes.map((disaster) => (
                   <motion.div
@@ -253,8 +406,12 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-800 dark:text-white">{disaster.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{disaster.locations.join(", ")}</p>
+                        <h3 className="font-medium text-gray-800 dark:text-white">
+                          {disaster.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {disaster.locations.join(", ")}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -281,21 +438,26 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-20 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
               >
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.safeZones}</h2>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                  {t.safeZones}
+                </h2>
                 {/* Legend */}
                 <div className="flex items-center gap-6 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Safe Zone</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Safe Zone
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Unsafe Zone</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Unsafe Zone
+                    </span>
                   </div>
                 </div>
                 <SafeZoneMap />
               </motion.div>
-
             )}
 
             <motion.div
@@ -313,22 +475,22 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               <div className="flex items-center gap-6 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Safe Zone</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Safe Zone
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Unsafe Zone</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Unsafe Zone
+                  </span>
                 </div>
               </div>
 
               {/* Map */}
               <Dumy_SafeZoneMap />
             </motion.div>
-
-
-
           </div>
-
 
           {/* Right Column - Weather and Details */}
           <div>
@@ -338,9 +500,14 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{t.weatherInfo}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                {t.weatherInfo}
+              </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                {t.currentLocation}: {dashboardData.mostAffectedArea}
+                {t.currentLocation}:{" "}
+                {coordinates
+                  ? `${coordinates.latitude.toFixed(3)}, ${coordinates.longitude.toFixed(3)}`
+                  : dashboardData.mostAffectedArea}
               </p>
               <WeatherInfo
                 externalLat={coordinates?.latitude}
@@ -366,17 +533,25 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                       className={`w-6 h-6 text-${activeDisaster.color}-500 dark:text-${activeDisaster.color}-400`}
                     />
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white">{activeDisaster.name}</h2>
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                    {activeDisaster.name}
+                  </h2>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Affected Areas</h3>
-                    <p className="text-gray-800 dark:text-white">{activeDisaster.locations.join(", ")}</p>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Affected Areas
+                    </h3>
+                    <p className="text-gray-800 dark:text-white">
+                      {activeDisaster.locations.join(", ")}
+                    </p>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Severity</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Severity
+                    </h3>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
                       <div
                         className={`bg-${activeDisaster.color}-500 h-2.5 rounded-full`}
@@ -386,7 +561,9 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Safety Instructions</h3>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Safety Instructions
+                    </h3>
                     <ul className="list-disc list-inside text-gray-800 dark:text-white text-sm mt-1 space-y-1">
                       <li>Stay informed through official channels</li>
                       <li>Prepare emergency supplies</li>
