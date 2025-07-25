@@ -12,6 +12,16 @@ router.post("/add-resource", async (req, res) => {
   }
 });
 
+router.get("/provided-resources", async (req, res) => {
+  try {
+    const resources = await Resource.find({});
+    res.status(200).json(resources);
+  } catch (err) {
+    console.error("❌ Error fetching resources:", err);
+    res.status(500).json({ error: "Failed to fetch provided resources" });
+  }
+});
+
 
 // Delete resource by ID
 // router.delete("/delete-resource/:id", async (req, res) => {
