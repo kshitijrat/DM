@@ -195,7 +195,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                   onChange={handleChange}
                   placeholder={t.namePlaceholder}
                   required
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full rounded-lg border-gray-500 p-2 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
@@ -207,7 +207,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                   onChange={handleChange}
                   placeholder={t.phonePlaceholder}
                   required
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -221,7 +221,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                 onChange={handleChange}
                 placeholder={t.locationPlaceholder}
                 required
-                className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -235,7 +235,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                   onChange={handleChange}
                   min="1"
                   required
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
@@ -244,7 +244,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                   name="resourceType"
                   value={formData.resourceType}
                   onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
                 >
                   <option value="shelter">{t.shelter}</option>
                   <option value="food">{t.food}</option>
@@ -261,7 +261,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                 name="urgency"
                 value={formData.urgency}
                 onChange={handleChange}
-                className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
               >
                 <option value="Low">{t.low}</option>
                 <option value="Medium">{t.medium}</option>
@@ -277,7 +277,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder={t.descriptionPlaceholder}
-                className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="w-full rounded-lg p-2 border-gray-500 dark:border-gray-900 dark:bg-gray-700 dark:text-white"
               />
             </div>
 
