@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { Home, Utensils, Pill } from "lucide-react";
+import { Home, Utensils, Pill, Bus, Trash } from "lucide-react";
 import { toast } from "../components/ui/Toaster";
 
 const ProvideResources = () => {
@@ -21,6 +21,7 @@ const ProvideResources = () => {
   const [countryCode, setCountryCode] = useState("+91");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("provide");
+  const [seekData, setSeekData] = useState([]);
 
   const countryCodes = [
     { code: "+91", name: "India" },
@@ -35,38 +36,28 @@ const ProvideResources = () => {
     { code: "+94", name: "Sri Lanka" },
   ];
 
-  const resourceRequests = [
-    {
-      id: 1,
-      type: "shelter",
-      name: "Sharma Family",
-      location: "Sector 12, Noida",
-      people: "4 people",
-      urgency: "High",
-      time: "2 hours ago",
-      icon: Home,
-    },
-    {
-      id: 2,
-      type: "food",
-      name: "Relief Camp #3",
-      location: "Mayur Vihar, Delhi",
-      people: "50+ people",
-      urgency: "Critical",
-      time: "5 hours ago",
-      icon: Utensils,
-    },
-    {
-      id: 3,
-      type: "medical",
-      name: "Kumar, Elderly",
-      location: "Dwarka, Delhi",
-      people: "2 people",
-      urgency: "Medium",
-      time: "1 day ago",
-      icon: Pill,
-    },
-  ];
+  const iconMap = {
+    shelter: Home,
+    food: Utensils,
+    medical: Pill,
+    transport: Bus,
+    other: Home,
+  };
+
+  const fetchSeekResources = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/seek/seek-resource");
+      setSeekData(res.data || []);
+    } catch (error) {
+      console.error("Failed to fetch seek resources:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "requests") {
+      fetchSeekResources();
+    }
+  }, [activeTab]);
 
   const isValidPhone = (phone) => {
     const digitsOnly = phone.replace(/\D/g, "");
@@ -140,6 +131,25 @@ const ProvideResources = () => {
     }
   };
 
+  const handleTrash = async (id) => {
+    let admin_id = prompt("Enter Admin Id");
+    console.log("Id is: ", { id })
+    if (admin_id == 111) {
+      try {
+        const response = await axios.delete(`http://localhost:5000/api/seek/delete-resource/${id}`);
+        alert(response.data.message);
+        // Remove deleted resource from local state to update UI
+        // setSeekData(prev => prev.filter(item => item._id !== id));
+        alert("Deleted successfully");
+      } catch (error) {
+        alert("Failed to delete resource");
+        console.error(error);
+      }
+    } else {
+      alert("Invalid Admin Id")
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -156,21 +166,19 @@ const ProvideResources = () => {
 
         <div className="flex justify-center mb-10">
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${
-              activeTab === "provide"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            } mr-4`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "provide"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              } mr-4`}
             onClick={() => setActiveTab("provide")}
           >
             Provide Resources
           </button>
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${
-              activeTab === "requests"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "requests"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              }`}
             onClick={() => setActiveTab("requests")}
           >
             View Requests
@@ -178,6 +186,7 @@ const ProvideResources = () => {
         </div>
 
         {activeTab === "provide" ? (
+          // --- Existing form stays unchanged ---
           <form
             onSubmit={handleSubmit}
             className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-xl shadow-md space-y-6"
@@ -283,32 +292,46 @@ const ProvideResources = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
-                loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {loading ? "Processing..." : "Submit Offer"}
             </button>
           </form>
         ) : (
+          // ----- Dynamic Seek Resource Requests Display -----
           <div className="max-w-4xl mx-auto space-y-6">
             <h2 className="text-2xl font-semibold mb-4">Current Requests</h2>
-            {resourceRequests.map((req) => (
-              <div
-                key={req.id}
-                className="bg-gray-800 p-6 rounded-xl shadow flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <req.icon className="w-8 h-8 text-blue-400" />
-                  <div>
-                    <p className="text-lg font-semibold">{req.name}</p>
-                    <p className="text-sm text-gray-300">{req.location}</p>
-                    <p className="text-sm text-gray-400">{req.people}</p>
+            {seekData.length === 0 ? (
+              <p className="text-center text-gray-400">No requests found.</p>
+            ) : (
+              seekData.map((req, index) => {
+                const Icon = iconMap[req.resourceType] || Home;
+                return (
+                  <div
+                    key={req._id || index}
+                    className="bg-gray-800 p-6 rounded-xl shadow flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Icon className="w-8 h-8 text-blue-400" />
+                      <div>
+                        <p className="text-lg font-semibold">{req.name}</p>
+                        <p className="text-sm text-gray-300">{req.location}</p>
+                        <p className="text-sm text-gray-400">
+                          {req.n_people} people — {req.urgency} urgency
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-400">{req.description || "No notes"}</p>
+                    <Trash
+                      onClick={() => handleTrash(req._id)}
+                      className="w-8 h-8 text-red-400 cursor-pointer"
+                      title="Delete Resource"
+                    />
                   </div>
-                </div>
-                <p className="text-sm text-gray-400">{req.time}</p>
-              </div>
-            ))}
+                );
+              })
+            )}
           </div>
         )}
       </div>
