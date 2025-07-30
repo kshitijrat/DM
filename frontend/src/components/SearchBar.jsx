@@ -15,13 +15,13 @@ const SearchBar = ({ onLocationFound,  placeholder_input = "Enter Country Name" 
       <input
         type="text"
         placeholder={placeholder_input}
-        className="w-full max-w-3xl px-4 py-2 border rounded-1-md focus:outline-none"
+        className="w-full max-w-3xl px-4 py-2 dark:border-gray-600 dark:text-gray-300 border rounded-1-md focus:outline-none"
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600"
+        className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-4 py-2 rounded-r-md "
       >
         Search
       </button>

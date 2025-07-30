@@ -1,0 +1,25 @@
+[
+  { "name": "India", "dial_code": "+91", "code": "IN" },
+  { "name": "United States", "dial_code": "+1", "code": "US" },
+  { "name": "United Kingdom", "dial_code": "+44", "code": "GB" },
+  { "name": "Canada", "dial_code": "+1", "code": "CA" },
+  { "name": "Australia", "dial_code": "+61", "code": "AU" },
+  { "name": "Germany", "dial_code": "+49", "code": "DE" },
+  { "name": "France", "dial_code": "+33", "code": "FR" },
+  { "name": "Japan", "dial_code": "+81", "code": "JP" },
+  { "name": "Brazil", "dial_code": "+55", "code": "BR" },
+  { "name": "China", "dial_code": "+86", "code": "CN" },
+  { "name": "Russia", "dial_code": "+7", "code": "RU" },
+  { "name": "Mexico", "dial_code": "+52", "code": "MX" },
+  { "name": "South Africa", "dial_code": "+27", "code": "ZA" },
+  { "name": "Italy", "dial_code": "+39", "code": "IT" },
+  { "name": "Spain", "dial_code": "+34", "code": "ES" },
+  { "name": "South Korea", "dial_code": "+82", "code": "KR" },
+  { "name": "Indonesia", "dial_code": "+62", "code": "ID" },
+  { "name": "Saudi Arabia", "dial_code": "+966", "code": "SA" },
+  { "name": "Turkey", "dial_code": "+90", "code": "TR" },
+  { "name": "Argentina", "dial_code": "+54", "code": "AR" }
+]
+
+
+
