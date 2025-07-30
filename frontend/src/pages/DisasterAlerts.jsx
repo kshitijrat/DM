@@ -24,6 +24,9 @@ import {
 import { toast } from "../components/ui/Toaster"
 import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
 import SafeZoneMap from "../components/SafeZoneMap"
+import FloodChart from "../components/FloodChart"
+import CycloneChart from "../components/CycloneChart"
+import HeatwaveChart from "../components/HeatwaveChart"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -110,49 +113,68 @@ const DisasterAlerts = ({ language, setLanguage }) => {
 
 
 
-  // Sample disaster data (unchanged)
-  const disasterTypes = [
-    {
-      id: 1,
-      type: "flood",
-      name: t.floodWarning,
-      icon: Droplets,
-      color: "blue",
-      locations: ["Delhi", "Mumbai", "Chennai"],
-    },
-    {
-      id: 2,
-      type: "earthquake",
-      name: t.earthquakeAlert,
-      icon: Mountain,
-      color: "yellow",
-      locations: ["Shimla", "Dehradun", "Gangtok"],
-    },
-    {
-      id: 3,
-      type: "cyclone",
-      name: t.cycloneWarning,
-      icon: Wind,
-      color: "purple",
-      locations: ["Kolkata", "Bhubaneswar", "Visakhapatnam"],
-    },
-    {
-      id: 4,
-      type: "fire",
-      name: t.fireAlert,
-      icon: Flame,
-      color: "red",
-      locations: ["Uttarakhand", "Madhya Pradesh", "Karnataka"],
-    },
-    {
-      id: 5,
-      type: "tsunami",
-      name: t.tsunamiWarning,
-      icon: Waves,
-      color: "green",
-      locations: ["Andaman", "Kerala", "Tamil Nadu"],
-    },
-  ]
+  const [disasterTypes, setDisasterTypes] = useState([]);
+
+useEffect(() => {
+  // Fetch active disaster events from ReliefWeb
+  const fetchDisasters = async () => {
+    try {
+      const res = await fetch(
+        "https://api.reliefweb.int/v2/disasters?appname=your-app-name&limit=50&filter[status][]=alert&filter[status][]=current"
+      );
+      const json = await res.json();
+      const events = json.data;
+
+      // Group events by type
+      const groups = {};
+      events.forEach(e => {
+        const type = e.fields.type?.[0]?.name || "Other";
+        const country = e.fields.country?.[0]?.name || "";
+        if (!groups[type]) groups[type] = new Set();
+        if (country) groups[type].add(country);
+      });
+
+      // Map types to UI-friendly objects
+      const typesArray = Object.entries(groups).map(([type, locations], idx) => ({
+        id: idx,
+        type: type.toLowerCase(),
+        name: type,
+        icon: getIconForType(type),
+        color: getColorForType(type),
+        locations: Array.from(locations).slice(0,3), // show up to 3
+      }));
+
+      setDisasterTypes(typesArray);
+    } catch (err) {
+      console.error("Error fetching disasters", err);
+    }
+  };
+
+  fetchDisasters();
+}, []);
+
+function getIconForType(type) {
+  switch (type.toLowerCase()) {
+    case "flood": return Droplets;
+    case "earthquake": return Mountain;
+    case "cyclone": return Wind;
+    case "fire": return Flame;
+    case "tsunami": return Waves;
+    default: return AlertTriangle;
+  }
+}
+
+function getColorForType(type) {
+  switch (type.toLowerCase()) {
+    case "flood": return "blue";
+    case "earthquake": return "yellow";
+    case "cyclone": return "purple";
+    case "fire": return "red";
+    case "tsunami": return "green";
+    default: return "gray";
+  }
+}
+
 
   useEffect(() => {
     const titles = {
@@ -393,8 +415,8 @@ const DisasterAlerts = ({ language, setLanguage }) => {
 
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
-            <DisasterChart language={language} />
-
+            <DisasterChart />
+            
             {/* Disaster Types */}
             <motion.div
               className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 mt-6"
@@ -403,7 +425,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                {t.disasterTypes} (Dumy)
+                {t.disasterTypes}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {disasterTypes.map((disaster) => (

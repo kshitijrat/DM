@@ -218,7 +218,7 @@ const DisasterChart = ({ language }) => {
         </TooltipProvider_cus>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
         <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4">
           <p className="text-sm text-gray-500 dark:text-gray-400">{t.intensity}</p>
           <div className="flex items-end mt-1">
@@ -282,7 +282,6 @@ const DisasterChart = ({ language }) => {
           }
         }} />
       </div>
-
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">{t.update}</p>
     </motion.div>
   )

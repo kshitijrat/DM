@@ -21,7 +21,6 @@ app.use("/api/provide", resourceRoute);
 const subscribeRoute = require('./routes/subscribe');
 app.use('/api/subscribe', subscribeRoute);
 
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
