@@ -10,25 +10,19 @@ const Home = () => {
   const [disasters, setDisasters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-
-  // Location state as countryName only
-  const [countryName, setCountryName] = useState("");  // Will hold country name from search input
+  const [countryName, setCountryName] = useState("");
   const [locationDetails, setLocationDetails] = useState("");
+  const [invalidCountry, setInvalidCountry] = useState(false);
 
-  // Handle location found from SearchBar (here just treat input as countryName)
   const handleLocationFound = (input) => {
-    // Set locationDetails for showing search text below search bar
     setLocationDetails(input);
     setCountryName(input);
   };
 
-  // Fetch disasters filtered by countryName (only if countryName exists)
-  const [invalidCountry, setInvalidCountry] = useState(false);
-
   useEffect(() => {
     const fetchDisasters = async () => {
       setIsLoading(true);
-      setInvalidCountry(false);  // reset on every fetch
+      setInvalidCountry(false);
       try {
         const baseUrl = "https://api.reliefweb.int/v1/disasters";
         const params = new URLSearchParams({
@@ -47,12 +41,8 @@ const Home = () => {
         const response = await fetch(url);
         const data = await response.json();
 
-        // Agar API se data nahi aaya ya empty array
         if (!data.data || data.data.length === 0) {
-          if (countryName) {
-            // Invalid ya no disasters for this country
-            setInvalidCountry(true);
-          }
+          if (countryName) setInvalidCountry(true);
           setDisasters([]);
           setIsLoading(false);
           return;
@@ -76,7 +66,7 @@ const Home = () => {
       } catch (error) {
         console.error("Error fetching disasters:", error);
         setDisasters([]);
-        setInvalidCountry(true);  // Treat error as invalid input here (optional)
+        setInvalidCountry(true);
       } finally {
         setIsLoading(false);
       }
@@ -84,8 +74,6 @@ const Home = () => {
 
     fetchDisasters();
   }, [countryName]);
-
-
 
   const features = [
     {
@@ -111,13 +99,13 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 text-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-4xl font-bold text-center mb-6"
+          className="text-4xl font-bold text-center mb-6 dark:text-white"
         >
           DisasterAlert – Stay Aware. Stay Safe.
         </motion.h1>
@@ -126,7 +114,7 @@ const Home = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-center text-gray-400 mb-12 text-lg"
+          className="text-center text-gray-700 dark:text-gray-400 mb-12 text-lg"
         >
           Empowering you with real-time alerts and safety insights to tackle emergencies effectively.
         </motion.p>
@@ -139,36 +127,33 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className="bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-400 text-sm">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-2 dark:text-white">{feature.title}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
             </motion.div>
           ))}
         </div>
 
-        {/* SearchBar and location details */}
+        {/* Search */}
         <div>
           <SearchBar onLocationFound={handleLocationFound} />
         </div>
 
-        {/* Disaster Cards */}
-        <h2 className="text-2xl font-semibold mb-4">
-          {countryName
-            ? `Recent Disasters in ${countryName}`
-            : "Recent Global Disasters"}
+        {/* Disaster Section */}
+        <h2 className="text-2xl font-semibold mb-4 dark:text-white">
+          {countryName ? `Recent Disasters in ${countryName}` : "Recent Global Disasters"}
         </h2>
 
-
         {isLoading ? (
-          <p className="text-gray-400 text-center">Loading latest updates...</p>
+          <p className="text-gray-600 dark:text-gray-400 text-center">Loading latest updates...</p>
         ) : invalidCountry ? (
           <p className="text-red-500 text-center font-semibold">
             Invalid country name or no disasters found for "{countryName}"
           </p>
         ) : disasters.length === 0 ? (
-          <p className="text-gray-400 text-center">No disaster data found.</p>
+          <p className="text-gray-600 dark:text-gray-400 text-center">No disaster data found.</p>
         ) : (
           <>
             <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
@@ -178,24 +163,26 @@ const Home = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md relative"
+                  className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-5 shadow-md relative"
                 >
-                  <div className="text-xs text-gray-400 absolute top-2 right-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 absolute top-2 right-4">
                     {disaster.date}
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm bg-red-600 px-2 py-1 rounded-full">
+                    <span className="text-sm bg-red-600 text-white px-2 py-1 rounded-full">
                       {disaster.status}
                     </span>
-                    <span className="text-sm text-blue-300">{disaster.type}</span>
+                    <span className="text-sm text-blue-500 dark:text-blue-300">
+                      {disaster.type}
+                    </span>
                   </div>
-                  <h3 className="text-lg font-bold text-red-400 mb-1">
+                  <h3 className="text-lg font-bold text-red-500 mb-1">
                     {disaster.name}
                   </h3>
-                  <p className="text-sm text-gray-300 mb-1">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">
                     <strong>Location:</strong> {disaster.country}
                   </p>
-                  <p className="text-sm text-gray-400 italic">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">
                     {disaster.description.slice(0, 150)}...
                   </p>
                 </motion.div>
@@ -218,7 +205,7 @@ const Home = () => {
           isOpen={modalIsOpen}
           onRequestClose={() => setModalIsOpen(false)}
           contentLabel="All Disasters Data"
-          className="bg-gray-800 max-w-4xl mx-auto mt-20 p-6 rounded-lg outline-none text-white"
+          className="bg-white dark:bg-gray-800 max-w-4xl mx-auto mt-20 p-6 rounded-lg outline-none dark:text-white text-gray-900"
           overlayClassName="fixed inset-0 bg-black bg-opacity-60 z-50"
         >
           <h2 className="text-2xl font-semibold mb-4">All Recent Disasters</h2>
@@ -230,13 +217,16 @@ const Home = () => {
           </button>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto">
             {disasters.map((disaster) => (
-              <div key={disaster.id} className="border-b border-gray-600 pb-3 mb-3">
+              <div
+                key={disaster.id}
+                className="border-b border-gray-300 dark:border-gray-600 pb-3 mb-3"
+              >
                 <p><strong>Name:</strong> {disaster.name}</p>
                 <p><strong>Type:</strong> {disaster.type}</p>
                 <p><strong>Status:</strong> {disaster.status}</p>
                 <p><strong>Country:</strong> {disaster.country}</p>
                 <p><strong>Date:</strong> {disaster.date}</p>
-                <p className="text-sm text-gray-300 mt-1">{disaster.description}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{disaster.description}</p>
               </div>
             ))}
           </div>

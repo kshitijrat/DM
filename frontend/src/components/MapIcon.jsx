@@ -5,92 +5,89 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
 
-// React Icons
-import { FaMapMarkedAlt, FaTimes } from 'react-icons/fa'; // Importing icons
+import { FaMap, FaTimes } from 'react-icons/fa'; // Map icon, Close icon
 
-// Routing Component
-const NavigationMap = ({ showMap }) => {
+// Routing logic
+const NavigationRoute = ({ active }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!showMap) return;
+    if (!active) return;
 
-    const routingControl = L.Routing.control({
+    const routing = L.Routing.control({
       waypoints: [
-        L.latLng(23.1765, 75.7885), // Start
-        L.latLng(23.1800, 75.7900), // End
+        L.latLng(23.1765, 75.7885),
+        L.latLng(23.1800, 75.7900),
       ],
+      show: false,
       routeWhileDragging: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
     }).addTo(map);
 
-    return () => {
-      map.removeControl(routingControl); // Cleanup to avoid duplicates
-    };
-  }, [showMap, map]);
+    return () => map.removeControl(routing);
+  }, [active, map]);
 
   return null;
 };
 
-// Main Component
 const MapIcon = () => {
-  const [showMap, setShowMap] = useState(false);
-  const [mapSize, setMapSize] = useState(300); // Default size is 300px
+  const [isOpen, setIsOpen] = useState(false);
+  const [mapSize, setMapSize] = useState(320); // Base size for desktop
 
-  const handleClick = () => {
-    setShowMap(!showMap);
-  };
-
-  const handleSizeChange = (e) => {
-    setMapSize(e.target.value); // Update map size based on slider input
-  };
+  const toggleMap = () => setIsOpen(prev => !prev);
 
   return (
-    <div>
-      {/* Toggle Button (Map ↔️ Close) */}
+    <>
+      {/* Toggle Button */}
       <button
-        onClick={handleClick}
-        className={`fixed bottom-10 right-10 p-4 ${
-          showMap ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white rounded-full z-30 shadow-md text-xl transition-all`}
+        onClick={toggleMap}
+        className={`fixed bottom-6 right-6 z-50 p-3 rounded-full shadow-xl text-white transition-all ${
+          isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
-        {showMap ? <FaTimes /> : <FaMapMarkedAlt />} {/* Using React Icon here */}
+        {isOpen ? <FaTimes size={20} /> : <FaMap size={20} />}
       </button>
 
-      {/* Custom Map Size Slider */}
-      {showMap && (
-        <div className="fixed bottom-4 right-25 p-2 bg-gray-200 rounded-lg z-20">
-          <label htmlFor="mapSize" className="block text-sm mb-2 text-gray-700">
-            Adjust Map Size:
+      {/* Map Size Slider (Optional UI Tweak) */}
+      {isOpen && (
+        <div className="fixed bottom-[105px] right-6 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-lg z-40 w-60">
+          <label htmlFor="mapSize" className="block text-sm mb-2 font-medium text-gray-700 dark:text-gray-300">
+            Map Size
           </label>
           <input
             id="mapSize"
             type="range"
             min="200"
-            max="700"
+            max="600"
             value={mapSize}
-            onChange={handleSizeChange}
+            onChange={(e) => setMapSize(Number(e.target.value))}
             className="w-full"
           />
-          <span className="text-sm">{mapSize}px</span>
+          <div className="text-xs text-right text-gray-600 dark:text-gray-400 mt-1">{mapSize}px</div>
         </div>
       )}
 
-      {/* Map Container */}
-      {showMap && (
+      {/* Floating Map Container */}
+      {isOpen && (
         <div
-          className="fixed z-50 bottom-29 right-10 border bg-white shadow-lg transition-all"
+          className="fixed bottom-[105px] right-6 bg-white border rounded-xl overflow-hidden z-40 shadow-xl transition-all"
           style={{
             width: `${mapSize}px`,
-            height: `${(mapSize * 0.66)}px`, // Adjust height based on width ratio (1:1.5)
-            maxHeight: 'calc(100vh - 150px)', // Prevent map from going under navbar (150px is an arbitrary value for navbar height)
+            height: `${mapSize * 0.65}px`,
+            maxWidth: '90vw',
+            maxHeight: '60vh',
           }}
         >
           <MapContainer
             center={[23.1765, 75.7885]}
-            zoom={13}
+            zoom={14}
             scrollWheelZoom={false}
-            style={{ height: '100%', width: '100%' }}
             zoomControl={false}
+            style={{ height: '100%', width: '100%' }}
+            dragging={true}
+            doubleClickZoom={false}
           >
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
@@ -99,12 +96,12 @@ const MapIcon = () => {
             <Marker position={[23.1765, 75.7885]}>
               <Popup>You are here</Popup>
             </Marker>
-            <NavigationMap showMap={showMap} />
+            <NavigationRoute active={isOpen} />
             <ZoomControl position="topright" />
           </MapContainer>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

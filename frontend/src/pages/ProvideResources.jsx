@@ -133,22 +133,19 @@ const ProvideResources = () => {
 
   const handleTrash = async (id) => {
     let admin_id = prompt("Enter Admin Id");
-    console.log("Id is: ", { id })
     if (admin_id == 111) {
       try {
         const response = await axios.delete(`http://localhost:5000/api/seek/delete-resource/${id}`);
         alert(response.data.message);
-        // Remove deleted resource from local state to update UI
-        // setSeekData(prev => prev.filter(item => item._id !== id));
         alert("Deleted successfully");
       } catch (error) {
         alert("Failed to delete resource");
         console.error(error);
       }
     } else {
-      alert("Invalid Admin Id")
+      alert("Invalid Admin Id");
     }
-  }
+  };
 
   return (
     <motion.div
@@ -158,27 +155,29 @@ const ProvideResources = () => {
       transition={{ duration: 0.5 }}
     >
       <Navbar />
-      <div className="min-h-screen bg-gray-900 py-12 px-4 text-white">
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 pt-16 overflow-x-hidden">
         <h1 className="text-3xl font-bold text-center mb-2">Provide Resources</h1>
-        <p className="text-center text-gray-400 mb-10">
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-10">
           Help others by offering food, shelter, and medical aid during emergencies.
         </p>
 
         <div className="flex justify-center mb-10">
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "provide"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              } mr-4`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${
+              activeTab === "provide"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
+            } mr-4`}
             onClick={() => setActiveTab("provide")}
           >
             Provide Resources
           </button>
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "requests"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              }`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${
+              activeTab === "requests"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
+            }`}
             onClick={() => setActiveTab("requests")}
           >
             View Requests
@@ -186,10 +185,9 @@ const ProvideResources = () => {
         </div>
 
         {activeTab === "provide" ? (
-          // --- Existing form stays unchanged ---
           <form
             onSubmit={handleSubmit}
-            className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-xl shadow-md space-y-6"
+            className="max-w-3xl mx-auto bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-md space-y-6"
           >
             <h2 className="text-xl font-semibold text-center mb-2">
               Resource Contribution Form
@@ -201,7 +199,7 @@ const ProvideResources = () => {
                 placeholder="Enter your full name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                 required
               />
 
@@ -209,7 +207,7 @@ const ProvideResources = () => {
                 <select
                   value={countryCode}
                   onChange={(e) => setCountryCode(e.target.value)}
-                  className="bg-gray-700 border border-gray-600 rounded px-2 py-2 w-28"
+                  className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-2 w-28"
                 >
                   {countryCodes.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -224,7 +222,7 @@ const ProvideResources = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "") })
                   }
-                  className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                  className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                   required
                 />
               </div>
@@ -234,7 +232,7 @@ const ProvideResources = () => {
                 placeholder="Enter your email address"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                 required
               />
               <input
@@ -242,7 +240,7 @@ const ProvideResources = () => {
                 placeholder="Enter the resource location"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                 required
               />
             </div>
@@ -251,7 +249,7 @@ const ProvideResources = () => {
               <select
                 value={formData.resourceType}
                 onChange={(e) => setFormData({ ...formData, resourceType: e.target.value })}
-                className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                 required
               >
                 <option value="shelter">Shelter</option>
@@ -265,7 +263,7 @@ const ProvideResources = () => {
                 placeholder="e.g., 10 meals, space for 5 people"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
                 required
               />
             </div>
@@ -273,7 +271,7 @@ const ProvideResources = () => {
             <select
               value={formData.availability}
               onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
-              className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
             >
               <option value="immediate">Immediate</option>
               <option value="within24">Within 24 hours</option>
@@ -285,47 +283,47 @@ const ProvideResources = () => {
               placeholder="Additional info about your resource..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="bg-gray-700 border border-gray-600 rounded px-4 py-2 w-full"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-4 py-2 w-full"
               rows={4}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
-                }`}
+              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
+                loading ? "bg-gray-400 dark:bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
               {loading ? "Processing..." : "Submit Offer"}
             </button>
           </form>
         ) : (
-          // ----- Dynamic Seek Resource Requests Display -----
           <div className="max-w-4xl mx-auto space-y-6">
             <h2 className="text-2xl font-semibold mb-4">Current Requests</h2>
             {seekData.length === 0 ? (
-              <p className="text-center text-gray-400">No requests found.</p>
+              <p className="text-center text-gray-600 dark:text-gray-400">No requests found.</p>
             ) : (
               seekData.map((req, index) => {
                 const Icon = iconMap[req.resourceType] || Home;
                 return (
                   <div
                     key={req._id || index}
-                    className="bg-gray-800 p-6 rounded-xl shadow flex items-center justify-between"
+                    className="bg-gray-100 dark:bg-gray-800 p-6 rounded-xl shadow flex items-center justify-between"
                   >
                     <div className="flex items-center gap-4">
-                      <Icon className="w-8 h-8 text-blue-400" />
+                      <Icon className="w-8 h-8 text-blue-500" />
                       <div>
                         <p className="text-lg font-semibold">{req.name}</p>
-                        <p className="text-sm text-gray-300">{req.location}</p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{req.location}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                           {req.n_people} people — {req.urgency} urgency
                         </p>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-400">{req.description || "No notes"}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{req.description || "No notes"}</p>
                     <Trash
                       onClick={() => handleTrash(req._id)}
-                      className="w-8 h-8 text-red-400 cursor-pointer"
+                      className="w-8 h-8 text-red-500 cursor-pointer"
                       title="Delete Resource"
                     />
                   </div>
