@@ -12,7 +12,7 @@ app.use(express.json());
 connectDB();
 
 // Routes
-app.use("/api/users", require("./routes/UserRoutes"));
+// app.use("/api/users", require("./routes/UserRoutes"));
 app.use("/api/alerts", require("./routes/alertRoutes"));
 app.use('/api/seek', require('./routes/seekresource'));
 // app.use('/api/provide',require('./routes/resources'))

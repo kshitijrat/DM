@@ -12,6 +12,7 @@ import {
 import { Line } from "react-chartjs-2"
 import { motion } from "framer-motion"
 import { AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Tooltip_cus, TooltipContent_cus, TooltipProvider_cus, TooltipTrigger_cus, } from "../components/ui/tooltip"
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Filler, Legend)
 
@@ -45,7 +46,7 @@ const DisasterChart = ({ language }) => {
       increasing: "Increasing",
       decreasing: "Decreasing",
       stable: "Stable",
-      update: "Data updates every 2 minutes from USGS earthquake API.",
+      update: "Data updates every minutes",
       yAxis: "Intensity (Mw)",
       xAxis: "Time",
       tooltip: "Intensity",
@@ -57,7 +58,7 @@ const DisasterChart = ({ language }) => {
       increasing: "बढ़ रही है",
       decreasing: "घट रही है",
       stable: "स्थिर",
-      update: "डेटा हर 2 मिनट में USGS भूकंप API से अपडेट होता है।",
+      update: "डेटा हर 2 मिनट में USGS भूचाल्क एपीआई से अपडेट होता है।",
       yAxis: "तीव्रता (Mw)",
       xAxis: "समय",
       tooltip: "तीव्रता",
@@ -66,7 +67,6 @@ const DisasterChart = ({ language }) => {
 
   const t = translations[language] || translations.en
 
-  // Helper: get average magnitude
   const calculateAvgMagnitude = (features) => {
     const mags = features
       .map((f) => f.properties.mag)
@@ -88,15 +88,12 @@ const DisasterChart = ({ language }) => {
 
         const avgMag = calculateAvgMagnitude(data.features)
 
-        // time label
         const currentTime = new Date().toLocaleTimeString()
 
-        // update trend
         const diff = avgMag - prevIntensity.current
         setTrend(diff)
         prevIntensity.current = avgMag
 
-        // Update states
         setCurrentIntensity(avgMag.toFixed(2))
         setChartData((prev) => ({
           labels: [...prev.labels, currentTime].slice(-12),
@@ -112,22 +109,11 @@ const DisasterChart = ({ language }) => {
       }
     }
 
-    // Initial fetch
     fetchAndUpdate()
-
-    // Fetch every 2 minutes (120000 ms)
-    intervalId = setInterval(fetchAndUpdate, 120000)
-
+    intervalId = setInterval(fetchAndUpdate, 6000)
     return () => clearInterval(intervalId)
   }, [])
 
-  // rest of your existing code (options, getTrendIcon, getTrendText, etc.) unchanged...
-
-  // just update the units displayed from % to magnitude (Mw) where applicable
-
-  // In the JSX, replace % sign with appropriate unit where needed
-
-  // Helper: get trend icon
   const getTrendIcon = () => {
     if (trend > 0.05) {
       return <ArrowUpRight className="w-4 h-4 text-green-500" />;
@@ -138,7 +124,6 @@ const DisasterChart = ({ language }) => {
     }
   };
 
-  // Helper: get trend text
   const getTrendText = () => {
     if (trend > 0.05) {
       return t.increasing;
@@ -149,7 +134,6 @@ const DisasterChart = ({ language }) => {
     }
   };
 
-  // Helper: get trend color
   const getTrendColor = () => {
     if (trend > 0.05) {
       return "text-green-500";
@@ -160,7 +144,6 @@ const DisasterChart = ({ language }) => {
     }
   };
 
-  // Chart options definition
   const options = {
     responsive: true,
     plugins: {
@@ -169,7 +152,7 @@ const DisasterChart = ({ language }) => {
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             return `${t.tooltip}: ${context.parsed.y} Mw`;
           }
         }
@@ -220,10 +203,19 @@ const DisasterChart = ({ language }) => {
     >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold text-red-600 dark:text-red-400">{t.title}</h2>
-        <div className="flex items-center space-x-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-3 py-1 rounded-full">
-          <AlertTriangle className="w-4 h-4" />
-          <span className="text-sm font-medium">{currentIntensity} Mw</span>
-        </div>
+        <TooltipProvider_cus>
+          <Tooltip_cus delayDuration={0}>
+            <TooltipTrigger_cus asChild>
+              <div className="flex items-center space-x-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-3 py-1 rounded-full cursor-pointer">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm font-medium">{currentIntensity} Mw</span>
+              </div>
+            </TooltipTrigger_cus>
+            <TooltipContent_cus side="bottom">
+              Moment Magnitude (Earthquake Strength)
+            </TooltipContent_cus>
+          </Tooltip_cus>
+        </TooltipProvider_cus>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -237,7 +229,6 @@ const DisasterChart = ({ language }) => {
             </div>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
-            {/* Since magnitude scale is roughly 0-10, scale width accordingly */}
             <div
               className="bg-gradient-to-r from-yellow-300 via-orange-500 to-red-500 h-2.5 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${(currentIntensity / 10) * 100}%` }}

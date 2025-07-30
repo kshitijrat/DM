@@ -2,23 +2,16 @@ import React, { useEffect, useState, useMemo } from "react"
 import axios from "axios"
 import { motion } from "framer-motion"
 import {
-  Thermometer,
-  Droplets,
-  Wind,
-  Gauge,
-  CloudRain,
-  Sunrise,
-  Sunset,
-  Cloud,
+  Thermometer, Droplets, Wind, Gauge, CloudRain,
+  Sunrise, Sunset, Cloud
 } from "lucide-react"
 
-const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language }) => {
+const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExternalWeather, language, setCountryCode }) => {
   const [weather, setWeather] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [weatherFetched, setWeatherFetched] = useState(false)
 
-  // ✅ Memoized Translations
   const translations = useMemo(() => ({
     en: {
       title: "Current Weather",
@@ -62,24 +55,53 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
 
   useEffect(() => {
     const fetchWeather = async (lat, lon) => {
+  setLoading(true)
+  try {
+    // 1. Get current weather
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`
+    )
+    setWeather(response.data)
+    setWeatherFetched(true)
+   
+
+    // pass current weather to parent if needed
+    if (setExternalWeather) setExternalWeather(response.data)
+    if (setCountryCode) setCountryCode(response.data.sys.country)
+
+  } catch (err) {
+    setError(t.error)
+    console.log("error:", err)
+  } finally {
+    setLoading(false)
+  }
+}
+
+
+    const fetchFromName = async (locationName) => {
       setLoading(true)
       try {
-        const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`,
+        const geo = await axios.get(
+          `https://api.openweathermap.org/geo/1.0/direct?q=${locationName}&limit=1&appid=9cfd85c582df09ab769763b0095ed07c`
         )
-        setWeather(response.data)
-        setWeatherFetched(true)
-        if (setExternalWeather) setExternalWeather(response.data)
+        if (geo.data && geo.data.length > 0) {
+          const { lat, lon } = geo.data[0]
+          fetchWeather(lat, lon)
+        } else {
+          setError("Location not found")
+        }
       } catch (err) {
-        setError(t.error)
-        console.log(err)
-      } finally {
+        setError("Failed to geocode location")
+        console.error(err)
         setLoading(false)
       }
     }
 
+    // ✅ Decide what to fetch based on props
     if (externalLat != null && externalLon != null) {
       fetchWeather(externalLat, externalLon)
+    } else if (externalLocationName) {
+      fetchFromName(externalLocationName)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
@@ -92,7 +114,7 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
       setError(t.notSupported)
       setLoading(false)
     }
-  }, [externalLat, externalLon, setExternalWeather, language])
+  }, [externalLat, externalLon, externalLocationName, setExternalWeather, setCountryCode, language])
 
   const getWindDirection = (degrees) => {
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
@@ -147,46 +169,14 @@ const WeatherInfo = ({ externalLat, externalLon, setExternalWeather, language })
           </div>
 
           <div className="p-6 grid grid-cols-2 gap-4">
-            <WeatherItem
-              icon={<Thermometer className="w-5 h-5 text-red-500" />}
-              label={t.feelsLike}
-              value={`${Math.round(weather.main.feels_like)}°C`}
-            />
-            <WeatherItem
-              icon={<Droplets className="w-5 h-5 text-blue-500" />}
-              label={t.humidity}
-              value={`${weather.main.humidity}%`}
-            />
-            <WeatherItem
-              icon={<Gauge className="w-5 h-5 text-purple-500" />}
-              label={t.pressure}
-              value={`${weather.main.pressure} hPa`}
-            />
-            <WeatherItem
-              icon={<Wind className="w-5 h-5 text-cyan-500" />}
-              label={t.windSpeed}
-              value={`${weather.wind.speed} m/s`}
-            />
-            <WeatherItem
-              icon={<CloudRain className="w-5 h-5 text-gray-500" />}
-              label={t.windDirection}
-              value={`${weather.wind.deg}° (${getWindDirection(weather.wind.deg)})`}
-            />
-            <WeatherItem
-              icon={<Cloud className="w-5 h-5 text-gray-500" />}
-              label={t.cloudiness}
-              value={`${weather.clouds.all}%`}
-            />
-            <WeatherItem
-              icon={<Sunrise className="w-5 h-5 text-yellow-500" />}
-              label={t.sunrise}
-              value={new Date(weather.sys.sunrise * 1000).toLocaleTimeString()}
-            />
-            <WeatherItem
-              icon={<Sunset className="w-5 h-5 text-orange-500" />}
-              label={t.sunset}
-              value={new Date(weather.sys.sunset * 1000).toLocaleTimeString()}
-            />
+            <WeatherItem icon={<Thermometer className="w-5 h-5 text-red-500" />} label={t.feelsLike} value={`${Math.round(weather.main.feels_like)}°C`} />
+            <WeatherItem icon={<Droplets className="w-5 h-5 text-blue-500" />} label={t.humidity} value={`${weather.main.humidity}%`} />
+            <WeatherItem icon={<Gauge className="w-5 h-5 text-purple-500" />} label={t.pressure} value={`${weather.main.pressure} hPa`} />
+            <WeatherItem icon={<Wind className="w-5 h-5 text-cyan-500" />} label={t.windSpeed} value={`${weather.wind.speed} m/s`} />
+            <WeatherItem icon={<CloudRain className="w-5 h-5 text-gray-500" />} label={t.windDirection} value={`${weather.wind.deg}° (${getWindDirection(weather.wind.deg)})`} />
+            <WeatherItem icon={<Cloud className="w-5 h-5 text-gray-500" />} label={t.cloudiness} value={`${weather.clouds.all}%`} />
+            <WeatherItem icon={<Sunrise className="w-5 h-5 text-yellow-500" />} label={t.sunrise} value={new Date(weather.sys.sunrise * 1000).toLocaleTimeString()} />
+            <WeatherItem icon={<Sunset className="w-5 h-5 text-orange-500" />} label={t.sunset} value={new Date(weather.sys.sunset * 1000).toLocaleTimeString()} />
           </div>
         </>
       )}

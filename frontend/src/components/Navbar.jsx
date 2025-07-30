@@ -10,12 +10,6 @@ const Navbar = ({ language, setLanguage }) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
 
-  // Languages available
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "hi", name: "हिंदी" },
-  ]
-
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -67,58 +61,32 @@ const Navbar = ({ language, setLanguage }) => {
               to="/"
               isActive={isActive("/")}
               icon={<Home size={18} />}
-              label={language === "en" ? "Home" : "Home"}
+              label="Home"
             />
             <NavLink
               to="/disaster-alerts"
               isActive={isActive("/disaster-alerts")}
               icon={<AlertTriangle size={18} />}
-              label={
-                language === "en" ? "Alerts" : "Alerts"
-              }
+              label="Alerts"
             />
             <NavLink
               to="/seek-resources"
               isActive={isActive("/seek-resources")}
               icon={<Search size={18} />}
-              label={
-                language === "en"
-                  ? "Seek Help"
-                  :"Seek Help"
-              }
+              label="Seek Help"
             />
             <NavLink
               to="/provide-resources"
               isActive={isActive("/provide-resources")}
               icon={<HandHeart size={18} />}
-              label={
-                language === "en"
-                  ? "Provide Help"
-                  :"Provide Help"
-              }
+              label="Provide Help"
             />
           </div>
 
           {/* Right side actions */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language selector */}
-            <div className="relative group">
-              <button className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                <Globe size={18} />
-                <span>{languages.find((lang) => lang.code === language)?.name}</span>
-              </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
-                    className={`block px-4 py-2 text-sm w-full text-left ${language === lang.code ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white" : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"}`}
-                  >
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+            
 
             {/* Dark mode toggle */}
             <button
@@ -143,9 +111,7 @@ const Navbar = ({ language, setLanguage }) => {
             >
               <LogIn size={16} />
               <span>
-                {language === "en"
-                  ? "Login"
-                  :"Login"}
+                Login
               </span>
             </Link>
             <Link
@@ -154,10 +120,7 @@ const Navbar = ({ language, setLanguage }) => {
             >
               <UserPlus size={16} />
               <span>
-                {language === "en"
-                  ? "Sign Up"
-                  :"Sign Up"
-                    }
+                Sign Up
               </span>
             </Link>
           </div>
@@ -183,38 +146,28 @@ const Navbar = ({ language, setLanguage }) => {
             to="/"
             isActive={isActive("/")}
             icon={<Home size={18} />}
-            label={language === "en" ? "Home" : language === "hi" ? "होम" : language === "es" ? "Inicio" : "Accueil"}
+            label="Home"
             onClick={() => setIsOpen(false)}
           />
           <MobileNavLink
             to="/disaster-alerts"
             isActive={isActive("/disaster-alerts")}
             icon={<AlertTriangle size={18} />}
-            label={
-              language === "en" ? "Alerts" : language === "hi" ? "अलर्ट" : language === "es" ? "Alertas" : "Alertes"
-            }
+            label="Alerts"
             onClick={() => setIsOpen(false)}
           />
           <MobileNavLink
             to="/seek-resources"
             isActive={isActive("/seek-resources")}
             icon={<Search size={18} />}
-            label={
-              language === "en"
-                ? "Seek Help"
-                :"मदद लें"
-            }
+            label="Seek Help"
             onClick={() => setIsOpen(false)}
           />
           <MobileNavLink
             to="/provide-resources"
             isActive={isActive("/provide-resources")}
             icon={<HandHeart size={18} />}
-            label={
-              language === "en"
-                ? "Provide Help"
-                :"मदद करें"
-            }
+            label="Provide Help"
             onClick={() => setIsOpen(false)}
           />
 
@@ -222,19 +175,7 @@ const Navbar = ({ language, setLanguage }) => {
             <div className="flex items-center justify-between px-4">
               <div className="flex items-center space-x-4">
                 {/* Language selector */}
-                <div className="relative">
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
-                  >
-                    {languages.map((lang) => (
-                      <option key={lang.code} value={lang.code}>
-                        {lang.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* temporary i removed this  */}
 
                 {/* Dark mode toggle */}
                 <button
@@ -257,9 +198,7 @@ const Navbar = ({ language, setLanguage }) => {
                 >
                   <LogIn size={14} />
                   <span>
-                    {language === "en"
-                      ? "Login"
-                      :"लॉगिन"}
+                    Login
                   </span>
                 </Link>
                 <Link
@@ -269,13 +208,7 @@ const Navbar = ({ language, setLanguage }) => {
                 >
                   <UserPlus size={14} />
                   <span>
-                    {language === "en"
-                      ? "Sign Up"
-                      : language === "hi"
-                        ? "साइन अप"
-                        : language === "es"
-                          ? "Registrarse"
-                          : "S'inscrire"}
+                    Sign Up
                   </span>
                 </Link>
               </div>

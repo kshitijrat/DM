@@ -7,6 +7,8 @@ import DisasterChart from "../components/DisasterChart"
 import WeatherInfo from "../components/WeatherInfo"
 import InfoCard from "../components/InfoCard"
 import Typed from 'typed.js'
+import SearchBar from "../components/SearchBar"
+import FiveDayForecast from "../components/FiveDayForecast"
 import {
   AlertTriangle,
   Thermometer,
@@ -69,32 +71,44 @@ const DisasterAlerts = ({ language, setLanguage }) => {
       noNearbyDisaster: "You are in safe zone",
     },
     hi: {
-      title: "लाइव आपदा निगरानी डैशबोर्ड",
-      subtitle: "आपदा तीव्रता, मौसम और सुरक्षित क्षेत्रों पर रीयल-टाइम अंतर्दृष्टि और अपडेट।",
-      disastersDetected: "पता लगाई गई आपदाएं",
-      avgIntensity: "औसत तीव्रता",
-      mostAffected: "सबसे अधिक प्रभावित",
-      weather: "मौसम",
-      alertsToday: "आज के अलर्ट",
-      recentDisasters: "हाल की आपदाएं",
-      safeZones: "सुरक्षित क्षेत्र",
-      viewDetails: "विवरण देखें",
-      disasterTypes: "आपदा प्रकार",
-      floodWarning: "बाढ़ चेतावनी",
-      earthquakeAlert: "भूकंप अलर्ट",
-      cycloneWarning: "चक्रवात चेतावनी",
-      fireAlert: "आग अलर्ट",
-      tsunamiWarning: "सुनामी चेतावनी",
-      loadingData: "डेटा लोड हो रहा है...",
-      viewMap: "मानचित्र देखें",
-      hideMap: "मानचित्र छिपाएं",
-      weatherInfo: "मौसम की जानकारी",
-      currentLocation: "वर्तमान स्थान",
-      nearbyDisasterAlert: "आपके आस-पास आपदा का अलर्ट",
-      noNearbyDisaster: "आपके स्थान के आसपास पिछले 24 घंटे में कोई आपदा नहीं पाई गई।",
+      // empty...
     },
   }
   const t = translations[language] || translations.en
+
+  const [searchedCoordinates, setSearchedCoordinates] = useState(null);
+  const [searchLocation, setSearchLocation] = useState("");
+  const [searchedLocationDetails, setSearchedLocationDetails] = useState(null);
+
+  // for search bar 
+  const handleLocationSearch = async (locationName) => {
+    if (!locationName.trim()) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(locationName)}`
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setSearchedCoordinates({ latitude: lat, longitude: lon });
+
+        // Save full address details from API response
+        setSearchedLocationDetails(data[0].address);
+        // toast(`Showing results for "${locationName}"`, "success");
+      } else {
+        setSearchedLocationDetails(null);
+        toast("Location not found", "error");
+      }
+    } catch (error) {
+      setSearchedLocationDetails(null);
+      toast("Failed to fetch location", "error");
+    }
+  };
+
+
 
   // Sample disaster data (unchanged)
   const disasterTypes = [
@@ -152,7 +166,8 @@ const DisasterAlerts = ({ language, setLanguage }) => {
       typed.destroy();
     }
   }, [])
-  
+
+
 
   const subtitles = [
     t.subtitle,
@@ -349,7 +364,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           )}
         </div>
 
-        {/* Show message for nearby disasters below cards */}
+        {/* Show text message for nearby disasters below cards */}
         {!loading && (
           <div
             className={`mb-8 text-center font-semibold text-lg ${nearbyDisasters.length > 0 ? "text-red-600" : "text-green-600"
@@ -375,6 +390,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
             <DisasterChart language={language} />
@@ -509,12 +525,37 @@ const DisasterAlerts = ({ language, setLanguage }) => {
                   ? `${coordinates.latitude.toFixed(3)}, ${coordinates.longitude.toFixed(3)}`
                   : dashboardData.mostAffectedArea}
               </p>
+
+              {/* Search Bar */}
+              <SearchBar placeholder_input="Entr Specific City Name" onLocationFound={handleLocationSearch} />
+              {/* Full Location Text */}
+              {searchedLocationDetails && (
+                <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  {[
+                    searchedLocationDetails.city ||
+                    searchedLocationDetails.town ||
+                    searchedLocationDetails.village,
+                    searchedLocationDetails.state,
+                    searchedLocationDetails.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              )}
+              {/* weather card */}
               <WeatherInfo
-                externalLat={coordinates?.latitude}
-                externalLon={coordinates?.longitude}
+                externalLat={searchedCoordinates?.latitude || coordinates?.latitude}
+                externalLon={searchedCoordinates?.longitude || coordinates?.longitude}
                 setExternalWeather={updateWeatherFromChild}
                 language={language}
               />
+              {/* Add this right below WeatherInfo */}
+              {(searchedCoordinates?.latitude || coordinates?.latitude) && (
+                <FiveDayForecast
+                  lat={searchedCoordinates?.latitude || coordinates?.latitude}
+                  lon={searchedCoordinates?.longitude || coordinates?.longitude}
+                />
+              )}
             </motion.div>
 
             {/* Active Disaster Details */}

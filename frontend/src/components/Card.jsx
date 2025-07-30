@@ -3,7 +3,7 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 
-const Card = ({ image, title, description, restricted, link, icon: Icon }) => {
+const Card = ({ image, title, description, restricted, link, icon: Icon, date, status, location }) => {
   return (
     <motion.div
       className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden transform transition duration-300 hover:shadow-2xl w-full max-w-sm mx-auto"
@@ -25,7 +25,15 @@ const Card = ({ image, title, description, restricted, link, icon: Icon }) => {
           </div>
         )}
       </div>
-      <div className="p-5">
+
+      {/* New info section */}
+      <div className="px-5 pt-3 pb-1 flex flex-col space-y-1 text-sm text-gray-500 dark:text-gray-400 font-mono">
+        {date && <span><strong>Date:</strong> {date}</span>}
+        {status && <span><strong>Status:</strong> {status}</span>}
+        {location && <span><strong>Location:</strong> {location}</span>}
+      </div>
+
+      <div className="p-5 pt-1">
         <p className="mt-2 text-gray-600 dark:text-gray-300">{description}</p>
         <Link
           to={link}
@@ -41,5 +49,6 @@ const Card = ({ image, title, description, restricted, link, icon: Icon }) => {
     </motion.div>
   )
 }
+
 
 export default Card

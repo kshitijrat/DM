@@ -1,72 +1,112 @@
 import React, { useState, useEffect } from "react";
 import { AlertTriangle, MapPin, Wind, Users } from "lucide-react";
-import { toast } from "../components/ui/Toaster";
 import { motion } from "framer-motion";
+import Modal from "react-modal";
+import SearchBar from "../components/SearchBar";
+
+Modal.setAppElement("#root");
 
 const Home = () => {
-  const [activeDisasters, setActiveDisasters] = useState([]);
+  const [disasters, setDisasters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  // Location state as countryName only
+  const [countryName, setCountryName] = useState("");  // Will hold country name from search input
+  const [locationDetails, setLocationDetails] = useState("");
+
+  // Handle location found from SearchBar (here just treat input as countryName)
+  const handleLocationFound = (input) => {
+    // Set locationDetails for showing search text below search bar
+    setLocationDetails(input);
+    setCountryName(input);
+  };
+
+  // Fetch disasters filtered by countryName (only if countryName exists)
+  const [invalidCountry, setInvalidCountry] = useState(false);
 
   useEffect(() => {
-    // Simulate fetching disaster data
-    setTimeout(() => {
-      setActiveDisasters([
-        {
-          id: 1,
-          type: "Flood",
-          location: "Mumbai, Maharashtra",
-          severity: "High",
-          affected: "50,000+",
-          time: "2 hours ago",
-        },
-        {
-          id: 2,
-          type: "Cyclone",
-          location: "Chennai, Tamil Nadu",
-          severity: "Extreme",
-          affected: "120,000+",
-          time: "5 hours ago",
-        },
-        {
-          id: 3,
-          type: "Earthquake",
-          location: "Shimla, Himachal Pradesh",
-          severity: "Moderate",
-          affected: "15,000+",
-          time: "1 day ago",
-        },
-      ]);
-      setIsLoading(false);
+    const fetchDisasters = async () => {
+      setIsLoading(true);
+      setInvalidCountry(false);  // reset on every fetch
+      try {
+        const baseUrl = "https://api.reliefweb.int/v1/disasters";
+        const params = new URLSearchParams({
+          limit: 10,
+          sort: "date:desc",
+          profile: "full",
+          appname: "disasteralert",
+        });
 
-      // Welcome toast
-      // toast("Welcome to DisasterAlert! Stay informed and safe.", "info");
-    }, 1500);
-  }, []);
+        if (countryName) {
+          params.append("filter[field]", "country.name");
+          params.append("filter[value]", countryName);
+        }
+
+        const url = `${baseUrl}?${params.toString()}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Agar API se data nahi aaya ya empty array
+        if (!data.data || data.data.length === 0) {
+          if (countryName) {
+            // Invalid ya no disasters for this country
+            setInvalidCountry(true);
+          }
+          setDisasters([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const parsed = data.data.map((item) => {
+          const fields = item.fields;
+          return {
+            id: item.id,
+            name: fields.name,
+            country: fields.country?.[0]?.name || "Unknown",
+            date: fields.date ? new Date(fields.date).toLocaleDateString() : "N/A",
+            rawDate: fields.date || "N/A",
+            type: fields.primary_type?.name || "Unknown",
+            description: fields.description || "No description available",
+            status: fields.status || "N/A",
+          };
+        });
+
+        setDisasters(parsed);
+      } catch (error) {
+        console.error("Error fetching disasters:", error);
+        setDisasters([]);
+        setInvalidCountry(true);  // Treat error as invalid input here (optional)
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDisasters();
+  }, [countryName]);
+
+
 
   const features = [
     {
       icon: <AlertTriangle className="h-10 w-10 text-red-500" />,
       title: "Real-time Alerts",
-      description:
-        "Get instant notifications about disasters in your area and stay ahead of danger.",
+      description: "Get instant notifications about disasters in your area.",
     },
     {
       icon: <MapPin className="h-10 w-10 text-green-600" />,
       title: "Safe Zone Mapping",
-      description:
-        "Locate the nearest safe zones and evacuation routes during emergencies.",
+      description: "Locate nearest safe zones during emergencies.",
     },
     {
       icon: <Wind className="h-10 w-10 text-blue-500" />,
       title: "Weather Monitoring",
-      description:
-        "Track weather conditions that might lead to potential disasters.",
+      description: "Track weather conditions leading to disasters.",
     },
     {
       icon: <Users className="h-10 w-10 text-purple-600" />,
       title: "Community Support",
-      description:
-        "Connect with others, offer or seek help during disaster situations.",
+      description: "Connect with others during crisis situations.",
     },
   ];
 
@@ -88,8 +128,7 @@ const Home = () => {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-center text-gray-400 mb-12 text-lg"
         >
-          Empowering you with real-time alerts and safety insights to tackle
-          emergencies effectively.
+          Empowering you with real-time alerts and safety insights to tackle emergencies effectively.
         </motion.p>
 
         {/* Features */}
@@ -103,46 +142,105 @@ const Home = () => {
               className="bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
             >
               <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {feature.title}
-              </h3>
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
               <p className="text-gray-400 text-sm">{feature.description}</p>
             </motion.div>
           ))}
         </div>
 
-        {/* Active Disasters */}
-        <h2 className="text-2xl font-semibold mb-4">Ongoing Disasters</h2>
+        {/* SearchBar and location details */}
+        <div>
+          <SearchBar onLocationFound={handleLocationFound} />
+        </div>
+
+        {/* Disaster Cards */}
+        <h2 className="text-2xl font-semibold mb-4">
+          {countryName
+            ? `Recent Disasters in ${countryName}`
+            : "Recent Global Disasters"}
+        </h2>
+
 
         {isLoading ? (
           <p className="text-gray-400 text-center">Loading latest updates...</p>
+        ) : invalidCountry ? (
+          <p className="text-red-500 text-center font-semibold">
+            Invalid country name or no disasters found for "{countryName}"
+          </p>
+        ) : disasters.length === 0 ? (
+          <p className="text-gray-400 text-center">No disaster data found.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {activeDisasters.map((disaster) => (
-              <motion.div
-                key={disaster.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="bg-red-800 border border-red-700 rounded-xl p-5 shadow-md"
+          <>
+            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+              {disasters.slice(0, 6).map((disaster) => (
+                <motion.div
+                  key={disaster.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-md relative"
+                >
+                  <div className="text-xs text-gray-400 absolute top-2 right-4">
+                    {disaster.date}
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm bg-red-600 px-2 py-1 rounded-full">
+                      {disaster.status}
+                    </span>
+                    <span className="text-sm text-blue-300">{disaster.type}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-red-400 mb-1">
+                    {disaster.name}
+                  </h3>
+                  <p className="text-sm text-gray-300 mb-1">
+                    <strong>Location:</strong> {disaster.country}
+                  </p>
+                  <p className="text-sm text-gray-400 italic">
+                    {disaster.description.slice(0, 150)}...
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setModalIsOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-full transition"
               >
-                <h3 className="text-lg font-bold text-red-400">{disaster.type}</h3>
-                <p className="text-gray-300">
-                  <strong>Location:</strong> {disaster.location}
-                </p>
-                <p className="text-gray-300">
-                  <strong>Severity:</strong> {disaster.severity}
-                </p>
-                <p className="text-gray-300">
-                  <strong>Affected:</strong> {disaster.affected}
-                </p>
-                <p className="text-gray-300">
-                  <strong>Reported:</strong> {disaster.time}
-                </p>
-              </motion.div>
+                View All Disasters
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Modal */}
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          contentLabel="All Disasters Data"
+          className="bg-gray-800 max-w-4xl mx-auto mt-20 p-6 rounded-lg outline-none text-white"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-60 z-50"
+        >
+          <h2 className="text-2xl font-semibold mb-4">All Recent Disasters</h2>
+          <button
+            onClick={() => setModalIsOpen(false)}
+            className="absolute top-3 right-5 text-red-400 hover:text-red-600 text-xl"
+          >
+            ✕
+          </button>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+            {disasters.map((disaster) => (
+              <div key={disaster.id} className="border-b border-gray-600 pb-3 mb-3">
+                <p><strong>Name:</strong> {disaster.name}</p>
+                <p><strong>Type:</strong> {disaster.type}</p>
+                <p><strong>Status:</strong> {disaster.status}</p>
+                <p><strong>Country:</strong> {disaster.country}</p>
+                <p><strong>Date:</strong> {disaster.date}</p>
+                <p className="text-sm text-gray-300 mt-1">{disaster.description}</p>
+              </div>
             ))}
           </div>
-        )}
+        </Modal>
       </div>
     </div>
   );
