@@ -37,7 +37,7 @@ const Profile = () => {
     const fetchCoins = async () => {
       try {
         if (user?.email) {
-          const res = await fetch(`http://localhost:5000/api/coin/get-coins/${user.email}`);
+          const res = await fetch(`https://dm-backend-auge.onrender.com/api/coin/get-coins/${user.email}`);
           const data = await res.json();
           setCoinCount(data.coins || 0);
           console.log("username: ",user.name)

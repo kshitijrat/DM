@@ -10,7 +10,6 @@ import {
   Legend,
 } from "chart.js"
 import { Line } from "react-chartjs-2"
-import { motion } from "framer-motion"
 import { io } from "socket.io-client"
 import { AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import {
@@ -22,7 +21,7 @@ import {
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Filler, Legend)
 
-const socket = io("http://localhost:5000") // Apne backend URL daal
+const socket = io("https://dm-backend-auge.onrender.com") // Apne backend URL daal
 
 const IoTSensorChart = ({ language }) => {
   const [chartData, setChartData] = useState({

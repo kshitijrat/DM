@@ -114,7 +114,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
   useEffect(() => {
     const fetchProvidedResources = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/provide/provided-resources");
+        const res = await axios.get("https://dm-backend-auge.onrender.com/api/provide/provided-resources");
         setProvidedResources(res.data);
       } catch (err) {
         console.error("Error fetching provided resources:", err);

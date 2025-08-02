@@ -66,7 +66,7 @@ const Login = ({ language, setLanguage }) => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
+      const res = await fetch("https://dm-backend-auge.onrender.com/api/login", {
         method: "POST",
         headers: {"Content-Type": "application/json" },
         credentials: "include", // for cookies

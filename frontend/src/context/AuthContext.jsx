@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/verify", {
+      const res = await fetch("https://dm-backend-auge.onrender.com/api/verify", {
         method: "GET",
         credentials: "include",
       });
@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
   };
+
 
   useEffect(() => {
     checkAuth();

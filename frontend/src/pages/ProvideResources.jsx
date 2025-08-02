@@ -41,7 +41,7 @@ const ProvideResources = () => {
 
   const fetchSeekResources = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/seek/seek-resource");
+      const res = await axios.get("https://dm-backend-auge.onrender.com/api/seek/seek-resource");
       setSeekData(res.data || []);
     } catch (error) {
       console.error("Failed to fetch seek resources:", error);

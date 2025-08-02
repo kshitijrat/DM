@@ -24,10 +24,7 @@ import {
 import { toast } from "../components/ui/Toaster"
 import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
 import SafeZoneMap from "../components/SafeZoneMap"
-import FloodChart from "../components/FloodChart"
-import CycloneChart from "../components/CycloneChart"
-import HeatwaveChart from "../components/HeatwaveChart"
-import IoTSensorChart from "../components/IotSensorChart"
+import IoTSensorChart from "../components/IoTSensorChart"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -409,8 +406,8 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
             <DisasterChart />
-            <br />
-            <IoTSensorChart />
+             {/* iot sensor chart  */}
+            {/* <IoTSensorChart en={language} /> */}
 
             {/* Disaster Types */}
             <motion.div

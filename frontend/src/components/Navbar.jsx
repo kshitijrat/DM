@@ -24,7 +24,7 @@ const Navbar = ({ language, setLanguage }) => {
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:5000/api/logout", {
+      await fetch("https://dm-backend-auge.onrender.com/api/logout", {
         method: "POST",
         credentials: "include",
       });

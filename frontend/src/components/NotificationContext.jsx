@@ -122,7 +122,7 @@ export const NotificationProvider = ({ children }) => {
 
 
   useEffect(() => {
-    const socket = io("http://localhost:5000"); // backend URL
+    const socket = io("https://dm-backend-auge.onrender.com"); // backend URL
 
     socket.on("newSensorData", (data) => {
       setNotifications((prev) => [
