@@ -26,7 +26,7 @@ connectDB();
 
 // ✅ Middlewares
 app.use(cors({
-  origin: "http://localhost:5173", // your frontend dev URL
+  origin: "https://dm-frontend-t8vb.onrender.com", // your frontend dev URL
   credentials: true,               // allow cookies to be sent
 }));
 app.use(express.json());
@@ -35,7 +35,7 @@ app.use(cookieParser()); // ✅ Moved before routes
 // ✅ Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://dm-frontend-t8vb.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   },
