@@ -17,14 +17,6 @@ const coinRoutes = require("./routes/coin");
 const app = express();
 const server = http.createServer(app); // Create HTTP server
 
-// server.js ya app.js me
-const path = require("path");
-app.use(express.static(path.join(__dirname, "frontend/dist")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend/dist", "index.html"));
-});
-
 console.log("✅ .env loaded, atlas_url =", process.env.atlas_url);
 
 // ✅ Connect to MongoDB
@@ -81,4 +73,14 @@ app.post("/api/sensor-data", (req, res) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// server.js ya app.js me
+// Static folder: frontend/dist
+const path = require("path")
+app.use(express.static(path.join(__dirname, "frontend", "dist")));
+
+// For SPA routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
 });

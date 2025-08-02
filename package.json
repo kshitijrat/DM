@@ -1,4 +1,14 @@
 {
+  "name": "disaster-app",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "npm run start --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  },
+  
   "dependencies": {
     "dotenv": "^16.4.7",
     "nodemailer": "^7.0.5"
