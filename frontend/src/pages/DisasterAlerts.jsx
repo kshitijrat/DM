@@ -406,7 +406,7 @@ const DisasterAlerts = ({ language, setLanguage }) => {
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
             <DisasterChart />
-             {/* iot sensor chart  */}
+            {/* iot sensor chart  */}
             {/* <IoTSensorChart en={language} /> */}
 
             {/* Disaster Types */}
@@ -417,8 +417,11 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                {t.disasterTypes}
+                Disaster Types Overview
               </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                When a disaster occurs, relevant types and details will be displayed here. Currently, no disasters detected in your area.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {disasterTypes.map((disaster) => (
                   <motion.div
@@ -497,8 +500,8 @@ const DisasterAlerts = ({ language, setLanguage }) => {
               exit={{ opacity: 0, height: 0 }}
               className="mt-20 z-1 bg-white border-2 dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
             >
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                Dumy Map {t.safeZones}
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                Sample Visualization of Safe Zones
               </h2>
 
               {/* Legend */}

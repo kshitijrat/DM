@@ -62,7 +62,6 @@ const Dumy_SafeZoneMap = () => {
 
   return (
     <div className="p-4j ">
-      <h2 className="text-xl text-white font-bold mb-2">🧪 Dummy Disaster Simulation</h2>
       <div className="mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded">{status}</div>
 
       <MapContainer center={[location.lat, location.lon]} zoom={8} style={{ height: "300px", width: "90%" }}>

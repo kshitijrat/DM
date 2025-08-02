@@ -127,7 +127,6 @@ const SafeZoneMap = () => {
 
   return (
     <div>
-      <h2 className="text-xl text-white font-bold mb-2">🧪Disaster Simulation</h2>
       <div className="mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded">{status}</div>
 
       {location && (
