@@ -35,7 +35,7 @@ app.use(cookieParser()); // ✅ Moved before routes
 // ✅ Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: "https://dm-frontend-t8vb.onrender.com",
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true,
   },
