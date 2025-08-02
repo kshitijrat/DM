@@ -12,6 +12,9 @@ import Footer from "./components/Footer"
 import ScrollToTop from "./components/ScrollToTop"
 import Navbar from "./components/Navbar"
 import MapIcon from "./components/MapIcon"
+import { AuthProvider } from "./context/AuthContext"
+import { NotificationProvider } from "./components/NotificationContext" // ✅ Fix spelling if needed
+import Profile from "./pages/Profile"
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -20,28 +23,33 @@ const App = () => {
     setLanguage(lang)
   }
 
+
+
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="flex flex-col min-h-screen">
-        {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
-        <Navbar />
-        <div className="flex-grow pt-16">
-          <Routes>
-          
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/disaster-alerts" element={<DisasterAlerts />} />
-            <Route path="/seek-resources" element={<SeekResources />} />
-            <Route path="/provide-resources" element={<ProvideResources />} />
-          </Routes>
-          <MapIcon />
-        </div>
-        <Footer language={language} />
-      </div>
-      
-    </Router>
+    <AuthProvider>
+      <NotificationProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="flex flex-col min-h-screen">
+            {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
+            <Navbar />
+            <div className="flex-grow pt-16">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/disaster-alerts" element={<DisasterAlerts />} />
+                <Route path="/seek-resources" element={<SeekResources />} />
+                <Route path="/provide-resources" element={<ProvideResources />} />
+                <Route path="/profile" element={<Profile />} />
+              </Routes>
+              <MapIcon />
+            </div>
+            <Footer language={language} />
+          </div>
+        </Router>
+      </NotificationProvider>
+    </AuthProvider>
   )
 }
 

@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import { Home, Utensils, Pill, Bus, Trash } from "lucide-react";
 import { toast } from "../components/ui/Toaster";
 import CountryCodePicker from "../components/CountryCodePicker";
+import { useAuth } from "../context/AuthContext";
+import SignupPromptDialog from "../components/ui/SignupPromptDialog";
+
 
 const ProvideResources = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +26,10 @@ const ProvideResources = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("provide");
   const [seekData, setSeekData] = useState([]);
+
+  const { user } = useAuth() // null if not logged in
+
+  const [showDialog, setShowDialog] = useState(false);
 
   const iconMap = {
     shelter: Home,
@@ -107,8 +114,14 @@ const ProvideResources = () => {
           onClick: () => console.log("Okay!"),
         },
       });
+
+      if (!user) {
+        setShowDialog(true); // 👈 Show dialog if user is NOT authenticated
+      }
+
     } catch (err) {
       console.error(err);
+      alert("error: ",{err});
       toast({
         title: "Submission Failed",
         description: err.response?.data?.error || "Something went wrong.",
@@ -151,21 +164,19 @@ const ProvideResources = () => {
 
         <div className="flex justify-center mb-10">
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${
-              activeTab === "provide"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
-            } mr-4`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "provide"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
+              } mr-4`}
             onClick={() => setActiveTab("provide")}
           >
             Provide Resources
           </button>
           <button
-            className={`px-6 py-2 rounded-full font-semibold transition ${
-              activeTab === "requests"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
-            }`}
+            className={`px-6 py-2 rounded-full font-semibold transition ${activeTab === "requests"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600"
+              }`}
             onClick={() => setActiveTab("requests")}
           >
             View Requests
@@ -272,9 +283,8 @@ const ProvideResources = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${
-                loading ? "bg-gray-400 dark:bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`w-full py-3 rounded-lg font-semibold transition duration-300 ${loading ? "bg-gray-400 dark:bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {loading ? "Processing..." : "Submit Offer"}
             </button>
@@ -317,7 +327,13 @@ const ProvideResources = () => {
           </div>
         )}
       </div>
+
+      <SignupPromptDialog open={showDialog} onClose={() => setShowDialog(false)} />
+
+
     </motion.div>
+
+
   );
 };
 

@@ -1,14 +1,52 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { useState, useEffect, useRef } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Home, AlertTriangle, Search, HandHeart, LogIn, UserPlus, Menu, X, Globe, Bell, Moon, Sun } from "lucide-react"
+import io from "socket.io-client";
+import { useNotifications } from "../components/NotificationContext";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = ({ language, setLanguage }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const { notifications } = useNotifications();
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+
+  const notifRef = useRef();
+
+  const { setUser, user } = useAuth();
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    try {
+      await fetch("http://localhost:5000/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setUser(null);
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
 
   // Handle scroll effect
   useEffect(() => {
@@ -40,7 +78,7 @@ const Navbar = ({ language, setLanguage }) => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md" : "bg-white dark:bg-gray-900"}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-gray-50 dark:bg-[#0d1117] backdrop-blur-md shadow-md" : "bg-white dark:bg-gray-900"}`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -86,7 +124,7 @@ const Navbar = ({ language, setLanguage }) => {
           {/* Right side actions */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language selector */}
-            
+
 
             {/* Dark mode toggle */}
             <button
@@ -96,34 +134,85 @@ const Navbar = ({ language, setLanguage }) => {
               {darkMode ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-gray-600" />}
             </button>
 
-            {/* Notification */}
-            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
-              <Bell size={18} className="text-gray-600 dark:text-gray-300" />
-              <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
-                3
-              </span>
-            </button>
+            {/* Notificatio icon  */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="p-2 relative rounded-full hover:bg-gray-200"
+                aria-label="Notifications"
+                aria-expanded={isNotifOpen}
+              >
+                <Bell size={20} className="text-gray-700" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification dropdown */}
+              {isNotifOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-80">
+                  {notifications.length === 0 ? (
+                    <p className="p-4 text-gray-500 dark:text-gray-400 text-center">No notifications</p>
+                  ) : (
+                    notifications.map((note) => (
+                      <div
+                        key={note.id}
+                        className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <p className="text-sm text-gray-800 dark:text-gray-200">{note.message}</p>
+                        <small className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(note.timestamp).toLocaleString()}
+                        </small>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Profile  */}
+            {user && (
+              <NavLink
+                to="/profile"
+                isActive={isActive("/profile")}
+                icon={<UserPlus size={18} />} // or <User size={18} />
+                label="Profile"
+              />
+            )}
+
 
             {/* Auth buttons */}
-            <Link
-              to="/login"
-              className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center space-x-1"
-            >
-              <LogIn size={16} />
-              <span>
-                Login
-              </span>
-            </Link>
-            <Link
-              to="/signup"
-              className="px-4 py-2 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors flex items-center space-x-1"
-            >
-              <UserPlus size={16} />
-              <span>
-                Sign Up
-              </span>
-            </Link>
+            {user ? (
+              <button
+                onClick={logout}
+                className="text-red-600 font-bold px-4 py-2 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center space-x-1"
+                >
+                  <LogIn size={16} />
+                  <span>Login</span>
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-2 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors flex items-center space-x-1"
+                >
+                  <UserPlus size={16} />
+                  <span>Sign Up</span>
+                </Link>
+              </>
+            )}
+
+
           </div>
+
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -168,8 +257,16 @@ const Navbar = ({ language, setLanguage }) => {
             isActive={isActive("/provide-resources")}
             icon={<HandHeart size={18} />}
             label="Provide Help"
+            onClick={() => setIsOpen(false)}/>
+
+          <MobileNavLink
+            to="/profile"
+            isActive={isActive("/profile")}
+            icon={<HandHeart size={18} />}
+            label="Profile+"
             onClick={() => setIsOpen(false)}
           />
+
 
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between px-4">
@@ -190,28 +287,93 @@ const Navbar = ({ language, setLanguage }) => {
                 </button>
               </div>
 
-              <div className="flex space-x-2">
-                <Link
-                  to="/login"
-                  className="px-3 py-1.5 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm flex items-center space-x-1"
-                  onClick={() => setIsOpen(false)}
+              {/* Notification */}
+              <div className="px-4 relative" ref={notifRef}>
+                <button
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <LogIn size={14} />
-                  <span>
-                    Login
-                  </span>
-                </Link>
-                <Link
-                  to="/signup"
-                  className="px-3 py-1.5 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors text-sm flex items-center space-x-1"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <UserPlus size={14} />
-                  <span>
-                    Sign Up
-                  </span>
-                </Link>
+                  <div className="flex items-center space-x-2">
+                    <Bell size={18} />
+                    <span>Notifications</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-red-500 text-white rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notification Drop Down  */}
+                {isNotifOpen && (
+                  <div className="mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-80">
+                    {notifications.length === 0 ? (
+                      <p className="p-4 text-gray-500 dark:text-gray-400 text-center">No notifications</p>
+                    ) : (
+                      notifications.map((note) => (
+                        <div
+                          key={note.id}
+                          className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        >
+                          <p className="text-sm text-gray-800 dark:text-gray-200">{note.message}</p>
+                          <small className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(note.timestamp).toLocaleString()}
+                          </small>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
+
+
+
+              {/* Profile  */}
+              {user && (
+                <MobileNavLink
+                  to="/profile"
+                  isActive={isActive("/profile")}
+                  icon={<UserPlus size={18} />} // or <User size={18} />
+                  label="Profile"
+                  onClick={() => setIsOpen(false)}
+                />
+              )}
+
+
+              {/* All Authentication */}
+              {user ? (
+                <button
+                  onClick={() => {
+                    logout()
+                    setIsOpen(false)
+                  }}
+                  className="text-red-600 font-bold px-3 py-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors w-full text-left"
+                >
+                  Logout
+                </button>
+              ) : (
+                <div className="flex space-x-2">
+                  <Link
+                    to="/login"
+                    className="px-3 py-1.5 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm flex items-center space-x-1"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <LogIn size={14} />
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="px-3 py-1.5 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors text-sm flex items-center space-x-1"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <UserPlus size={14} />
+                    <span>Sign Up</span>
+                  </Link>
+                </div>
+              )}
+
+
+
             </div>
           </div>
         </div>
@@ -224,11 +386,10 @@ const Navbar = ({ language, setLanguage }) => {
 const NavLink = ({ to, isActive, icon, label }) => (
   <Link
     to={to}
-    className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 transition-colors ${
-      isActive
-        ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
-        : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-    }`}
+    className={`px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1 transition-colors ${isActive
+      ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+      }`}
   >
     {icon}
     <span>{label}</span>
@@ -239,11 +400,10 @@ const NavLink = ({ to, isActive, icon, label }) => (
 const MobileNavLink = ({ to, isActive, icon, label, onClick }) => (
   <Link
     to={to}
-    className={`block px-3 py-2 rounded-md text-base font-medium flex items-center space-x-2 ${
-      isActive
-        ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
-        : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-    }`}
+    className={`block px-3 py-2 rounded-md text-base font-medium flex items-center space-x-2 ${isActive
+      ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+      }`}
     onClick={onClick}
   >
     {icon}

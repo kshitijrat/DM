@@ -1,28 +1,75 @@
 const express = require("express");
 const connectDB = require("./config/db");
 const cors = require("cors");
-const resourceRoute = require("./routes/resources");
+const http = require("http");
+const { Server } = require("socket.io");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const authRoutes = require("./routes/auth");
+const resourceRoute = require("./routes/resources");
+const alertRoutes = require("./routes/alertRoutes");
+const seekRoutes = require("./routes/seekresource");
+const subscribeRoute = require("./routes/subscribe");
+const coinRoutes = require("./routes/coin");
 
-// Connect to MongoDB
+
+
+
+const app = express();
+const server = http.createServer(app); // Create HTTP server
+
+// ✅ Connect to MongoDB
 connectDB();
 
-// Routes
-// app.use("/api/users", require("./routes/UserRoutes"));
-app.use("/api/alerts", require("./routes/alertRoutes"));
-app.use('/api/seek', require('./routes/seekresource'));
-// app.use('/api/provide',require('./routes/resources'))
+// ✅ Middlewares
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend dev URL
+  credentials: true,               // allow cookies to be sent
+}));
+app.use(express.json());
+app.use(cookieParser()); // ✅ Moved before routes
+
+// ✅ Socket.io setup
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
+// ✅ Routes
+app.use("/api", authRoutes);
+app.use("/api/alerts", alertRoutes);
+app.use("/api/seek", seekRoutes);
 app.use("/api/provide", resourceRoute);
+app.use("/api/subscribe", subscribeRoute);
+app.use("/api/coin", coinRoutes);
 
-const subscribeRoute = require('./routes/subscribe');
-app.use('/api/subscribe', subscribeRoute);
+// ✅ IoT Sensor Data Route
+app.post("/api/sensor-data", (req, res) => {
+  const { sensorType, vibration } = req.body;
 
+  if (!sensorType || vibration === undefined) {
+    return res.status(400).json({ error: "sensorType and vibration required" });
+  }
+
+  console.log(`Received IoT data: ${sensorType} vibration=${vibration}`);
+  io.emit("newSensorData", { sensorType, vibration, timestamp: new Date() });
+
+  res.json({ message: "Sensor data received" });
+});
+
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String },
-    location: { type: String },
-    role: { type: String, enum: ["victim", "volunteer", "admin"], default: "victim" },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }, // ✅ ADD THIS LINE
+  phone: { type: String },
+  location: { type: String },
+  coins: { type: Number, default: 0 },
+  role: { type: String, enum: ["victim", "volunteer", "admin"], default: "victim" },
 });
 
 module.exports = mongoose.model("User", UserSchema);

@@ -11,6 +11,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [weatherFetched, setWeatherFetched] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
 
   const translations = useMemo(() => ({
     en: {
@@ -54,29 +55,30 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
   const t = useMemo(() => translations[language] || translations.en, [language, translations])
 
   useEffect(() => {
+    const isCurrentlyOnline = navigator.onLine
+    setIsOnline(isCurrentlyOnline)
+
     const fetchWeather = async (lat, lon) => {
-  setLoading(true)
-  try {
-    // 1. Get current weather
-    const response = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`
-    )
-    setWeather(response.data)
-    setWeatherFetched(true)
-   
+      setLoading(true)
+      try {
+        const response = await axios.get(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`
+        )
+        setWeather(response.data)
+        setWeatherFetched(true)
 
-    // pass current weather to parent if needed
-    if (setExternalWeather) setExternalWeather(response.data)
-    if (setCountryCode) setCountryCode(response.data.sys.country)
+        localStorage.setItem("cachedWeather", JSON.stringify(response.data))
+        localStorage.setItem("lastUpdated", new Date().toISOString())
 
-  } catch (err) {
-    setError(t.error)
-    console.log("error:", err)
-  } finally {
-    setLoading(false)
-  }
-}
-
+        if (setExternalWeather) setExternalWeather(response.data)
+        if (setCountryCode) setCountryCode(response.data.sys.country)
+      } catch (err) {
+        setError(t.error)
+        console.log("error:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
     const fetchFromName = async (locationName) => {
       setLoading(true)
@@ -92,26 +94,35 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
         }
       } catch (err) {
         setError("Failed to geocode location")
-        console.error(err)
         setLoading(false)
       }
     }
 
-    // ✅ Decide what to fetch based on props
-    if (externalLat != null && externalLon != null) {
-      fetchWeather(externalLat, externalLon)
-    } else if (externalLocationName) {
-      fetchFromName(externalLocationName)
-    } else if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
-        () => {
-          setError(t.permissionDenied)
-          setLoading(false)
-        },
-      )
+    if (isCurrentlyOnline) {
+      if (externalLat != null && externalLon != null) {
+        fetchWeather(externalLat, externalLon)
+      } else if (externalLocationName) {
+        fetchFromName(externalLocationName)
+      } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
+          () => {
+            setError(t.permissionDenied)
+            setLoading(false)
+          }
+        )
+      } else {
+        setError(t.notSupported)
+        setLoading(false)
+      }
     } else {
-      setError(t.notSupported)
+      const cached = localStorage.getItem("cachedWeather")
+      if (cached) {
+        setWeather(JSON.parse(cached))
+        setWeatherFetched(true)
+      } else {
+        setError(t.permissionDenied)
+      }
       setLoading(false)
     }
   }, [externalLat, externalLon, externalLocationName, setExternalWeather, setCountryCode, language])
@@ -153,7 +164,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
           <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-2xl font-bold">{weather.name}</h3>
+                <h3 className="text-2xl font-bold">{weather.name} {isOnline ? "🌐" : "📴"}</h3>
                 <p className="text-lg">{weather.weather[0].description}</p>
                 <p className="text-3xl font-bold mt-2">{Math.round(weather.main.temp)}°C</p>
               </div>

@@ -6,8 +6,10 @@ import { motion } from "framer-motion"
 import { Eye, EyeOff, LogIn, ArrowLeft } from "lucide-react"
 import Navbar from "../components/Navbar"
 import { toast } from "../components/ui/Toaster"
+import { useAuth } from "../context/AuthContext";
 
 const Login = ({ language, setLanguage }) => {
+  const { setUser } = useAuth(); // useAuth hook must be called inside the component
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -34,57 +36,6 @@ const Login = ({ language, setLanguage }) => {
       passwordRequired: "Password is required",
       passwordShort: "Password must be at least 6 characters",
     },
-    hi: {
-      title: "वापसी पर स्वागत है",
-      subtitle: "जारी रखने के लिए अपने खाते में साइन इन करें",
-      emailLabel: "ईमेल",
-      emailPlaceholder: "अपना ईमेल दर्ज करें",
-      passwordLabel: "पासवर्ड",
-      passwordPlaceholder: "अपना पासवर्ड दर्ज करें",
-      forgotPassword: "पासवर्ड भूल गए?",
-      loginButton: "साइन इन करें",
-      noAccount: "खाता नहीं है?",
-      signUp: "साइन अप करें",
-      backToHome: "होम पर वापस जाएं",
-      emailRequired: "ईमेल आवश्यक है",
-      emailInvalid: "कृपया एक वैध ईमेल दर्ज करें",
-      passwordRequired: "पासवर्ड आवश्यक है",
-      passwordShort: "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
-    },
-    es: {
-      title: "Bienvenido de Nuevo",
-      subtitle: "Inicia sesión en tu cuenta para continuar",
-      emailLabel: "Correo electrónico",
-      emailPlaceholder: "Ingresa tu correo electrónico",
-      passwordLabel: "Contraseña",
-      passwordPlaceholder: "Ingresa tu contraseña",
-      forgotPassword: "¿Olvidaste tu contraseña?",
-      loginButton: "Iniciar Sesión",
-      noAccount: "¿No tienes una cuenta?",
-      signUp: "Regístrate",
-      backToHome: "Volver al inicio",
-      emailRequired: "El correo electrónico es obligatorio",
-      emailInvalid: "Por favor, introduce un correo electrónico válido",
-      passwordRequired: "La contraseña es obligatoria",
-      passwordShort: "La contraseña debe tener al menos 6 caracteres",
-    },
-    fr: {
-      title: "Bon Retour",
-      subtitle: "Connectez-vous à votre compte pour continuer",
-      emailLabel: "Email",
-      emailPlaceholder: "Entrez votre email",
-      passwordLabel: "Mot de passe",
-      passwordPlaceholder: "Entrez votre mot de passe",
-      forgotPassword: "Mot de passe oublié?",
-      loginButton: "Se Connecter",
-      noAccount: "Vous n'avez pas de compte?",
-      signUp: "S'inscrire",
-      backToHome: "Retour à l'accueil",
-      emailRequired: "L'email est requis",
-      emailInvalid: "Veuillez entrer un email valide",
-      passwordRequired: "Le mot de passe est requis",
-      passwordShort: "Le mot de passe doit comporter au moins 6 caractères",
-    },
   }
 
   const t = translations[language] || translations.en
@@ -109,23 +60,41 @@ const Login = ({ language, setLanguage }) => {
   }
 
   const handleLogin = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
+    setLoading(true);
 
-    setLoading(true)
+    try {
+      const res = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json" },
+        credentials: "include", // for cookies
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem("token", "user-authenticated")
-      toast("Successfully logged in!", "success")
-      navigate("/")
-      setLoading(false)
-    }, 1500)
-  }
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast(data.message || "Login failed", "error");
+        setLoading(false);
+        return;
+      }
+      setUser(data.user);
+      // localStorage.setItem("token", data.token);
+      toast("Successfully logged in!", "success");
+      navigate("/");
+    } catch (error) {
+      console.error("Login error:", error);
+      toast("Something went wrong. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117]">
       <Navbar language={language} setLanguage={setLanguage} />
 
       <div className="flex justify-center items-center min-h-screen pt-16 pb-12 px-4">

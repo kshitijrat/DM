@@ -27,6 +27,7 @@ import SafeZoneMap from "../components/SafeZoneMap"
 import FloodChart from "../components/FloodChart"
 import CycloneChart from "../components/CycloneChart"
 import HeatwaveChart from "../components/HeatwaveChart"
+import IoTSensorChart from "../components/IotSensorChart"
 
 const DisasterAlerts = ({ language, setLanguage }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -111,92 +112,86 @@ const DisasterAlerts = ({ language, setLanguage }) => {
     }
   };
 
-
-
   const [disasterTypes, setDisasterTypes] = useState([]);
 
-useEffect(() => {
-  // Fetch active disaster events from ReliefWeb
-  const fetchDisasters = async () => {
-    try {
-      const res = await fetch(
-        "https://api.reliefweb.int/v2/disasters?appname=your-app-name&limit=50&filter[status][]=alert&filter[status][]=current"
-      );
-      const json = await res.json();
-      const events = json.data;
+  useEffect(() => {
+    // Fetch active disaster events from ReliefWeb
+    const fetchDisasters = async () => {
+      try {
+        const res = await fetch(
+          "https://api.reliefweb.int/v2/disasters?appname=your-app-name&limit=50&filter[status][]=alert&filter[status][]=current"
+        );
+        const json = await res.json();
+        const events = json.data;
 
-      // Group events by type
-      const groups = {};
-      events.forEach(e => {
-        const type = e.fields.type?.[0]?.name || "Other";
-        const country = e.fields.country?.[0]?.name || "";
-        if (!groups[type]) groups[type] = new Set();
-        if (country) groups[type].add(country);
-      });
+        // Group events by type
+        const groups = {};
+        events.forEach(e => {
+          const type = e.fields.type?.[0]?.name || "Other";
+          const country = e.fields.country?.[0]?.name || "";
+          if (!groups[type]) groups[type] = new Set();
+          if (country) groups[type].add(country);
+        });
 
-      // Map types to UI-friendly objects
-      const typesArray = Object.entries(groups).map(([type, locations], idx) => ({
-        id: idx,
-        type: type.toLowerCase(),
-        name: type,
-        icon: getIconForType(type),
-        color: getColorForType(type),
-        locations: Array.from(locations).slice(0,3), // show up to 3
-      }));
+        // Map types to UI-friendly objects
+        const typesArray = Object.entries(groups).map(([type, locations], idx) => ({
+          id: idx,
+          type: type.toLowerCase(),
+          name: type,
+          icon: getIconForType(type),
+          color: getColorForType(type),
+          locations: Array.from(locations).slice(0, 3), // show up to 3
+        }));
 
-      setDisasterTypes(typesArray);
-    } catch (err) {
-      console.error("Error fetching disasters", err);
+        setDisasterTypes(typesArray);
+      } catch (err) {
+        console.error("Error fetching disasters", err);
+      }
+    };
+
+    fetchDisasters();
+  }, []);
+
+  function getIconForType(type) {
+    switch (type.toLowerCase()) {
+      case "flood": return Droplets;
+      case "earthquake": return Mountain;
+      case "cyclone": return Wind;
+      case "fire": return Flame;
+      case "tsunami": return Waves;
+      default: return AlertTriangle;
     }
-  };
-
-  fetchDisasters();
-}, []);
-
-function getIconForType(type) {
-  switch (type.toLowerCase()) {
-    case "flood": return Droplets;
-    case "earthquake": return Mountain;
-    case "cyclone": return Wind;
-    case "fire": return Flame;
-    case "tsunami": return Waves;
-    default: return AlertTriangle;
   }
-}
 
-function getColorForType(type) {
-  switch (type.toLowerCase()) {
-    case "flood": return "blue";
-    case "earthquake": return "yellow";
-    case "cyclone": return "purple";
-    case "fire": return "red";
-    case "tsunami": return "green";
-    default: return "gray";
+  function getColorForType(type) {
+    switch (type.toLowerCase()) {
+      case "flood": return "blue";
+      case "earthquake": return "yellow";
+      case "cyclone": return "purple";
+      case "fire": return "red";
+      case "tsunami": return "green";
+      default: return "gray";
+    }
   }
-}
 
 
   useEffect(() => {
     const titles = {
-      strings: ["Worldwide Disaster Info",
-        "Real-time Safety Alerts",
-        "24*7 Monitoring"],
-      typeSpeed: 40,
+      strings: [
+        "🌐 Real-time Global Disaster Alerts",
+        "🛡️ Stay Safe with 24/7 Monitoring",
+        "📍 Location-based Emergency Updates",
+        "📊 Data-Driven Disaster Intelligence",
+      ],
+      typeSpeed: 50,
+      backSpeed: 20,
+      backDelay: 1000,
+      loop: true,
     };
+
     const typed = new Typed('#title', titles);
-    return () => {
-      typed.destroy();
-    }
-  }, [])
-
-
-
-  const subtitles = [
-    t.subtitle,
-    "Stay informed with latest disaster updates.",
-    "Protect yourself with live alerts.",
-    "Your safety, our priority.",
-  ];
+    return () => typed.destroy();
+  }, []);
 
   // Helper: Calculate distance between two lat/lon points in km
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -289,7 +284,6 @@ function getColorForType(type) {
     fetchInitialData()
   }, [])
 
-
   // Whenever coordinates or earthquakes change, check for nearby disasters within 100 km
   useEffect(() => {
     if (!coordinates || earthquakes.length === 0) return
@@ -314,7 +308,7 @@ function getColorForType(type) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117] pt-16">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
@@ -324,13 +318,12 @@ function getColorForType(type) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">
-            {/* <Typewriter texts={titles} typingSpeed={20} deletingSpeed={15} pauseTime={50} /> */}
-            <span id="title"></span>
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-lg mt-2">
-            <span id="subtitle"></span>
-            {/* <Typewriter texts={subtitles} typingSpeed={30} deletingSpeed={15} pauseTime={0} /> */}
+          <h5
+            className="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-300 text-center py-4"
+          ><span id="title"></span></h5>
+
+          <p className="text-center text-gray-600 dark:text-gray-300 text-lg md:text-xl mt-2">
+            <span>Empowering communities with accurate, real-time updates on disasters and emergencies — anytime, anywhere.</span>
           </p>
         </motion.div>
 
@@ -416,7 +409,9 @@ function getColorForType(type) {
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
             <DisasterChart />
-            
+            <br />
+            <IoTSensorChart />
+
             {/* Disaster Types */}
             <motion.div
               className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 mt-6"

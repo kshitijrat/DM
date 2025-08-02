@@ -8,6 +8,17 @@ router.get("/", async (req, res) => {
     res.json(alerts);
 });
 
+// for notification
+router.post("/new-alert", async (req, res) => {
+  const newAlert = new Alert(req.body);
+  await newAlert.save();
+
+  // Emit real-time alert to all clients
+  req.io.emit("newAlert", newAlert);  // 👈 VERY IMPORTANT
+
+  res.status(201).json(newAlert);
+});
+
 
 // Create an alert
 router.post("/", async (req, res) => {

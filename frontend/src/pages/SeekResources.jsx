@@ -125,7 +125,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 text-black dark:text-white pt-16 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117] text-black dark:text-white pt-16 overflow-x-hidden">
       <Navbar language={language} setLanguage={setLanguage} />
 
       <div className="container mx-auto px-4  flex flex-col lg:flex-row gap-10">

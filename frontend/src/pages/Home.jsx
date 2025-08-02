@@ -3,6 +3,9 @@ import { AlertTriangle, MapPin, Wind, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import Modal from "react-modal";
 import SearchBar from "../components/SearchBar";
+import ContributeAndEarn from "../components/ContributeAndEarn";
+import DisasterFeed from "../components/DisasterFeed";
+
 
 Modal.setAppElement("#root");
 
@@ -112,6 +115,9 @@ const Home = () => {
           DisasterAlert – Stay Aware. Stay Safe.
         </motion.h1>
 
+      {/* Disaster Feed 
+      <DisasterFeed /> */}
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -139,6 +145,7 @@ const Home = () => {
             </motion.div>
           ))}
         </div>
+
 
         {/* Search */}
         <SearchBar onLocationFound={handleLocationFound} />
@@ -207,6 +214,11 @@ const Home = () => {
                 View All Disasters
               </button>
             </div>
+            {/* Contribution Section */}
+<div className="p-2">
+  <ContributeAndEarn />
+</div>
+
           </>
         )}
 

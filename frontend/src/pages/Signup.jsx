@@ -44,76 +44,6 @@ const Signup = ({ language, setLanguage }) => {
       passwordsNotMatch: "Passwords do not match",
       termsAgree: "By signing up, you agree to our Terms of Service and Privacy Policy",
     },
-    hi: {
-      title: "खाता बनाएं",
-      subtitle: "आपदाओं के दौरान सुरक्षित रहने के लिए हमारे समुदाय से जुड़ें",
-      nameLabel: "पूरा नाम",
-      namePlaceholder: "अपना पूरा नाम दर्ज करें",
-      emailLabel: "ईमेल",
-      emailPlaceholder: "अपना ईमेल दर्ज करें",
-      passwordLabel: "पासवर्ड",
-      passwordPlaceholder: "एक पासवर्ड बनाएं",
-      confirmPasswordLabel: "पासवर्ड की पुष्टि करें",
-      confirmPasswordPlaceholder: "अपने पासवर्ड की पुष्टि करें",
-      signupButton: "खाता बनाएं",
-      haveAccount: "पहले से ही खाता है?",
-      login: "लॉग इन करें",
-      backToHome: "होम पर वापस जाएं",
-      nameRequired: "नाम आवश्यक है",
-      emailRequired: "ईमेल आवश्यक है",
-      emailInvalid: "कृपया एक वैध ईमेल दर्ज करें",
-      passwordRequired: "पासवर्ड आवश्यक है",
-      passwordShort: "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
-      passwordsNotMatch: "पासवर्ड मेल नहीं खाते",
-      termsAgree: "साइन अप करके, आप हमारी सेवा की शर्तों और गोपनीयता नीति से सहमत हैं",
-    },
-    es: {
-      title: "Crear una Cuenta",
-      subtitle: "Únete a nuestra comunidad para mantenerte seguro durante desastres",
-      nameLabel: "Nombre Completo",
-      namePlaceholder: "Ingresa tu nombre completo",
-      emailLabel: "Correo Electrónico",
-      emailPlaceholder: "Ingresa tu correo electrónico",
-      passwordLabel: "Contraseña",
-      passwordPlaceholder: "Crea una contraseña",
-      confirmPasswordLabel: "Confirmar Contraseña",
-      confirmPasswordPlaceholder: "Confirma tu contraseña",
-      signupButton: "Crear Cuenta",
-      haveAccount: "¿Ya tienes una cuenta?",
-      login: "Iniciar sesión",
-      backToHome: "Volver al inicio",
-      nameRequired: "El nombre es obligatorio",
-      emailRequired: "El correo electrónico es obligatorio",
-      emailInvalid: "Por favor, introduce un correo electrónico válido",
-      passwordRequired: "La contraseña es obligatoria",
-      passwordShort: "La contraseña debe tener al menos 6 caracteres",
-      passwordsNotMatch: "Las contraseñas no coinciden",
-      termsAgree: "Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad",
-    },
-    fr: {
-      title: "Créer un Compte",
-      subtitle: "Rejoignez notre communauté pour rester en sécurité pendant les catastrophes",
-      nameLabel: "Nom Complet",
-      namePlaceholder: "Entrez votre nom complet",
-      emailLabel: "Email",
-      emailPlaceholder: "Entrez votre email",
-      passwordLabel: "Mot de passe",
-      passwordPlaceholder: "Créez un mot de passe",
-      confirmPasswordLabel: "Confirmer le Mot de passe",
-      confirmPasswordPlaceholder: "Confirmez votre mot de passe",
-      signupButton: "Créer un Compte",
-      haveAccount: "Vous avez déjà un compte?",
-      login: "Se connecter",
-      backToHome: "Retour à l'accueil",
-      nameRequired: "Le nom est requis",
-      emailRequired: "L'email est requis",
-      emailInvalid: "Veuillez entrer un email valide",
-      passwordRequired: "Le mot de passe est requis",
-      passwordShort: "Le mot de passe doit comporter au moins 6 caractères",
-      passwordsNotMatch: "Les mots de passe ne correspondent pas",
-      termsAgree:
-        "En vous inscrivant, vous acceptez nos Conditions d'Utilisation et notre Politique de Confidentialité",
-    },
   }
 
   const t = translations[language] || translations.en
@@ -152,7 +82,7 @@ const Signup = ({ language, setLanguage }) => {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-
+ 
   const handleSignup = async (e) => {
     e.preventDefault()
 
@@ -160,17 +90,40 @@ const Signup = ({ language, setLanguage }) => {
 
     setLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem("token", "user-authenticated")
-      toast("Account created successfully!", "success")
-      navigate("/")
-      setLoading(false)
-    }, 1500)
+    try {
+  const res = await fetch("http://localhost:5000/api/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    toast(data.message || "Signup failed", "error");
+    setLoading(false);
+    return;
+  }
+
+  localStorage.setItem("token", data.token);
+  toast("Account created successfully!", "success");
+  navigate("/");
+} catch (err) {
+  console.error(err);
+  toast("Something went wrong. Please try again.", "error");
+} finally {
+  setLoading(false);
+}
+
+
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117]">
       <Navbar language={language} setLanguage={setLanguage} />
 
       <div className="flex justify-center items-center min-h-screen pt-16 pb-12 px-4">

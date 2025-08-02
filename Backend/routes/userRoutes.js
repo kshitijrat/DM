@@ -1,18 +1,16 @@
+// user routes
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-// Get all users
-router.get("/", async (req, res) => {
-    const users = await User.find();
-    res.json(users);
-});
-
-// Register User
-router.post("/", async (req, res) => {
-    const newUser = new User(req.body);
-    await newUser.save();
-    res.json(newUser);
+router.get("/user/coins", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("coins");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ coins: user.coins || 0 });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;
