@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, UserPlus, ArrowLeft } from "lucide-react"
+import { Eye, EyeOff, UserPlus, ArrowLeft, AlertTriangle } from "lucide-react"
 import Navbar from "../components/Navbar"
 import { toast } from "../components/ui/Toaster"
 import { useAuth } from "../context/AuthContext"
@@ -140,6 +140,7 @@ const Signup = ({ language, setLanguage }) => {
       navigate("/");
     } catch (err) {
       console.error(err);
+      alert(err.message);
       toast("Something went wrong. Please try again.", "error");
     } finally {
       setLoading(false);

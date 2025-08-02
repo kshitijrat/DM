@@ -1,6 +1,6 @@
 // routes/earn.js
-import express from "express";
-import { verifyToken } from "../middleware/authmiddleware.js";
+const express = require("express");
+const { verifyToken } = require("../middleware/authmiddleware");
 
 const router = express.Router();
 

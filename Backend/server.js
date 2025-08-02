@@ -6,6 +6,8 @@ const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
+
+
 const authRoutes = require("./routes/auth");
 const resourceRoute = require("./routes/resources");
 const alertRoutes = require("./routes/alertRoutes");
@@ -24,17 +26,18 @@ connectDB();
 
 // ✅ Middlewares
 app.use(cors({
-  origin: "*", // your frontend dev URL
+  origin: "https://dm-frontend-t8vb.onrender.com", // your frontend dev URL
   credentials: true,               // allow cookies to be sent
 }));
 app.use(express.json());
 app.use(cookieParser()); // ✅ Moved before routes
 
 
+
 // ✅ Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://dm-frontend-t8vb.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -47,6 +50,12 @@ io.on("connection", (socket) => {
   });
 });
 
+app.use((req, res, next) => {
+  console.log("Request path:", req.path);
+  next();
+});
+
+
 // ✅ Routes
 app.use("/api", authRoutes);
 app.use("/api/alerts", alertRoutes);
@@ -54,6 +63,10 @@ app.use("/api/seek", seekRoutes);
 app.use("/api/provide", resourceRoute);
 app.use("/api/subscribe", subscribeRoute);
 app.use("/api/coin", coinRoutes);
+
+app.get("/", (req, res) => {
+  res.send("✅ Disaster Alert Backend is running!");
+});
 
 // ✅ IoT Sensor Data Route
 app.post("/api/sensor-data", (req, res) => {
@@ -75,12 +88,14 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+
+
 // server.js ya app.js me
 // Static folder: frontend/dist
 const path = require("path")
 app.use(express.static(path.join(__dirname, "frontend", "dist")));
-
+// console.log("path is: ",path);
 // For SPA routing
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-});
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+// });

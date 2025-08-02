@@ -1,7 +1,7 @@
 "use client"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { useState } from "react"
+import { useState,useRef, useEffect } from "react"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
@@ -15,6 +15,7 @@ import MapIcon from "./components/MapIcon"
 import { AuthProvider } from "./context/AuthContext"
 import { NotificationProvider } from "./components/NotificationContext" // ✅ Fix spelling if needed
 import Profile from "./pages/Profile"
+import { io } from "socket.io-client";
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -22,6 +23,31 @@ const App = () => {
   const handleLanguageChange = (lang) => {
     setLanguage(lang)
   }
+
+
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    // Socket connection create karo yaha
+    socketRef.current = io("https://dm-backend-auge.onrender.com", {
+      withCredentials: true,
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("Socket connected with ID:", socketRef.current.id);
+    });
+
+    socketRef.current.on("newAlert", (alert) => {
+      console.log("New alert received:", alert);
+      // Yahan apne alert state update kar sakte ho ya notification dikha sakte ho
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
+
 
 
 
