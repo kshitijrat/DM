@@ -16,6 +16,7 @@ import { AuthProvider } from "./context/AuthContext"
 import { NotificationProvider } from "./components/NotificationContext" // ✅ Fix spelling if needed
 import Profile from "./pages/Profile"
 import { io } from "socket.io-client";
+import LocationPermissionChecker from "./hooks/LocationPermissionChecker"
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -59,6 +60,7 @@ const App = () => {
           <div className="flex flex-col min-h-screen">
             {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
             <Navbar />
+            <LocationPermissionChecker />
             <div className="flex-grow pt-16">
               <Routes>
                 <Route path="/" element={<Home />} />
