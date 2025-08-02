@@ -65,7 +65,7 @@ const Footer = ({ language }) => {
     const email = e.target.email.value;
 
     try {
-      const res = await fetch('http://localhost:5000/api/subscribe', {
+      const res = await fetch('https://dm-backend-auge.onrender.com/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
