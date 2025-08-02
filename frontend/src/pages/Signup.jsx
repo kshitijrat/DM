@@ -111,6 +111,8 @@ const Signup = ({ language, setLanguage }) => {
         return;
       }
 
+      
+
       // ✅ Now auto-login
       const loginRes = await fetch("http://localhost:5000/api/login", {
         method: "POST",
