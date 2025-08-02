@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaMapMarkedAlt, FaTimesCircle } from 'react-icons/fa';
-import {NavigationMap} from './NavigationMap'; // LivePathTracker wala component
+import NavigationMap from './NavigationMap';
 
 const MapIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
