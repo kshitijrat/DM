@@ -18,7 +18,7 @@ router.post("/add-resource", async (req, res) => {
       if (coinEntry) {
         coinEntry.coins += 1;
         await coinEntry.save();
-        console.log("total coins: ", coinEntry.coins); 
+        console.log("Updated coinEntry:", coinEntry);
       } else {
         console("coin create: ");
         await Coin.create({ email, coins: 1 });
