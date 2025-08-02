@@ -81,19 +81,24 @@ const NavigationMap = () => {
   const defaultCenter = [23.1765, 75.7885];
 
   return (
-    <MapContainer
-      center={defaultCenter}
-      zoom={15}
-      scrollWheelZoom={true}
-      style={{ height: "400px", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <div>
+      <p className="text-sm text-gray-700 mb-2">
+        This map tracks your path from the starting location to your current position in real-time, helping you navigate and find your way easily.
+      </p>
+      <MapContainer
+        center={defaultCenter}
+        zoom={15}
+        scrollWheelZoom={true}
+        style={{ height: "400px", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      <LivePathTracker />
-    </MapContainer>
+        <LivePathTracker />
+      </MapContainer>
+    </div>
   );
 };
 
