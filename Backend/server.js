@@ -14,8 +14,6 @@ const subscribeRoute = require("./routes/subscribe");
 const coinRoutes = require("./routes/coin");
 
 
-
-
 const app = express();
 const server = http.createServer(app); // Create HTTP server
 
