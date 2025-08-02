@@ -146,13 +146,11 @@ const Signup = ({ language, setLanguage }) => {
       setLoading(false);
     }
 
-
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117]">
       <Navbar language={language} setLanguage={setLanguage} />
-
       <div className="flex justify-center items-center min-h-screen pt-16 pb-12 px-4">
         <motion.div
           className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md"
