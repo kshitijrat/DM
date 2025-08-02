@@ -7,6 +7,10 @@ import { Eye, EyeOff, UserPlus, ArrowLeft, AlertTriangle } from "lucide-react"
 import Navbar from "../components/Navbar"
 import { toast } from "../components/ui/Toaster"
 import { useAuth } from "../context/AuthContext"
+import Modal from "../components/Modal"
+import TermsOfService from "../components/TermsOfService"
+import PrivacyPolicy from "../components/PrivacyPolicy"
+
 
 const Signup = ({ language, setLanguage }) => {
   const navigate = useNavigate()
@@ -20,6 +24,18 @@ const Signup = ({ language, setLanguage }) => {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const { user, setUser } = useAuth();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: "", body: null });
+  const openModal = (type) => {
+    if (type === "privacy") {
+      setModalContent({ title: "Privacy Policy", body: <PrivacyPolicy /> });
+    } else if (type === "terms") {
+      setModalContent({ title: "Terms of Service", body: <TermsOfService /> });
+    }
+    setModalOpen(true);
+  };
+
 
   // Translations
   const translations = {
@@ -111,7 +127,7 @@ const Signup = ({ language, setLanguage }) => {
         return;
       }
 
-      
+
 
       // ✅ Now auto-login
       const loginRes = await fetch("https://dm-backend-auge.onrender.com/api/login", {
@@ -248,8 +264,28 @@ const Signup = ({ language, setLanguage }) => {
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>}
             </div>
 
+            {/* accept term and conditon text  */}
             <div className="mt-2">
-              <p className="text-xs text-gray-500 dark:text-gray-400">{t.termsAgree}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                By signing up, you agree to our{" "}
+                <button
+                  type="button"
+                  onClick={() => openModal("terms")}
+                  className="text-red-500 dark:text-red-400 underline hover:text-red-600"
+                >
+                  Terms of Service
+                </button>{" "}
+                and{" "}
+                <button
+                  type="button"
+                  onClick={() => openModal("privacy")}
+                  className="text-red-500 dark:text-red-400 underline hover:text-red-600"
+                >
+                  Privacy Policy
+                </button>
+                .
+              </p>
+
             </div>
 
             <button
@@ -298,6 +334,11 @@ const Signup = ({ language, setLanguage }) => {
           </div>
         </motion.div>
       </div>
+
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={modalContent.title}>
+        {modalContent.body}
+      </Modal>
+
     </div>
   )
 }
