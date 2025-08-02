@@ -115,7 +115,7 @@ const Home = () => {
           DisasterAlert – Stay Aware. Stay Safe.
         </motion.h1>
 
-      {/* Disaster Feed 
+        {/* Disaster Feed 
       <DisasterFeed /> */}
 
         <motion.p
@@ -126,25 +126,6 @@ const Home = () => {
         >
           Real-time alerts and reliable safety insights during emergencies.
         </motion.p>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2 }}
-              className="bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-lg p-5 transition duration-200"
-            >
-              <div className="mb-3">{feature.icon}</div>
-              <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
-            </motion.div>
-          ))}
-        </div>
 
 
         {/* Search */}
@@ -215,45 +196,64 @@ const Home = () => {
               </button>
             </div>
             {/* Contribution Section */}
-<div className="p-2">
-  <ContributeAndEarn />
-</div>
+            <div className="p-2">
+              <ContributeAndEarn />
+            </div>
+
+            {/* Features */}
+            <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-6 mt-7">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.2 }}
+                  className="bg-white dark:bg-gray-900 rounded-xl hover:shadow-lg p-5 transition duration-200"
+                >
+                  <div className="mb-3">{feature.icon}</div>
+                  <h3 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
+                </motion.div>
+              ))}
+            </div>
 
           </>
         )}
 
         {/* Disaster Details Modal */}
         <Modal
-  isOpen={!!selectedDisaster}
-  onRequestClose={() => setSelectedDisaster(null)}
-  contentLabel="Disaster Details"
-  className="bg-[#fefcf8] dark:bg-[#10111b] font-sans leading-relaxed max-w-2xl mx-auto mt-20 p-0 rounded-sm outline-none text-gray-800 dark:text-gray-200 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] border border-gray-300 dark:border-gray-700 relative max-h-[80vh] overflow-y-auto"
-  overlayClassName="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
->
-  {selectedDisaster && (
-    <div className="p-8">
-      {/* Close Button */}
-      <button
-        onClick={() => setSelectedDisaster(null)}
-        className="absolute top-3 right-5 text-red-500 hover:text-red-700 text-xl"
-      >
-        ✕
-      </button>
+          isOpen={!!selectedDisaster}
+          onRequestClose={() => setSelectedDisaster(null)}
+          contentLabel="Disaster Details"
+          className="bg-[#fefcf8] dark:bg-[#10111b] font-sans leading-relaxed max-w-2xl mx-auto mt-20 p-0 rounded-sm outline-none text-gray-800 dark:text-gray-200 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] border border-gray-300 dark:border-gray-700 relative max-h-[80vh] overflow-y-auto"
+          overlayClassName="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+        >
+          {selectedDisaster && (
+            <div className="p-8">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedDisaster(null)}
+                className="absolute top-3 right-5 text-red-500 hover:text-red-700 text-xl"
+              >
+                ✕
+              </button>
 
-      {/* Content */}
-      <h2 className="text-3xl font-bold  mb-4">
-        {selectedDisaster.name}
-      </h2>
-      <p className="mb-2"><strong>Type:</strong> {selectedDisaster.type}</p>
-      <p className="mb-2"><strong>Status:</strong> {selectedDisaster.status}</p>
-      <p className="mb-2"><strong>Country:</strong> {selectedDisaster.country}</p>
-      <p className="mb-2"><strong>Date:</strong> {selectedDisaster.date}</p>
-      <p className="mt-4 text-justify text-sm text-gray-700 dark:text-gray-300">
-        {selectedDisaster.description}
-      </p>
-    </div>
-  )}
-</Modal>
+              {/* Content */}
+              <h2 className="text-3xl font-bold  mb-4">
+                {selectedDisaster.name}
+              </h2>
+              <p className="mb-2"><strong>Type:</strong> {selectedDisaster.type}</p>
+              <p className="mb-2"><strong>Status:</strong> {selectedDisaster.status}</p>
+              <p className="mb-2"><strong>Country:</strong> {selectedDisaster.country}</p>
+              <p className="mb-2"><strong>Date:</strong> {selectedDisaster.date}</p>
+              <p className="mt-4 text-justify text-sm text-gray-700 dark:text-gray-300">
+                {selectedDisaster.description}
+              </p>
+            </div>
+          )}
+        </Modal>
 
 
         {/* All Disasters Modal */}
