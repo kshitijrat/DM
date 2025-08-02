@@ -17,7 +17,7 @@ const Signup = ({ language, setLanguage }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    
+
     password: "",
     confirmPassword: "",
   })

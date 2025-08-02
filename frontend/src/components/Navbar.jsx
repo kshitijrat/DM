@@ -257,7 +257,7 @@ const Navbar = ({ language, setLanguage }) => {
             isActive={isActive("/provide-resources")}
             icon={<HandHeart size={18} />}
             label="Provide Help"
-            onClick={() => setIsOpen(false)}/>
+            onClick={() => setIsOpen(false)} />
 
           <MobileNavLink
             to="/profile"
@@ -325,19 +325,6 @@ const Navbar = ({ language, setLanguage }) => {
                   </div>
                 )}
               </div>
-
-
-
-              {/* Profile  */}
-              {user && (
-                <MobileNavLink
-                  to="/profile"
-                  isActive={isActive("/profile")}
-                  icon={<UserPlus size={18} />} // or <User size={18} />
-                  label="Profile"
-                  onClick={() => setIsOpen(false)}
-                />
-              )}
 
 
               {/* All Authentication */}
