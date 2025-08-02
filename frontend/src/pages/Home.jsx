@@ -148,7 +148,7 @@ const Home = () => {
         ) : (
           <>
             <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-              {disasters.slice(0, 6).map((disaster) => (
+              {disasters.slice(0, 4).map((disaster) => (
                 <motion.div
                   key={disaster.id}
                   initial={{ opacity: 0, y: 20 }}
