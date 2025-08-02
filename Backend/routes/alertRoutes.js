@@ -5,6 +5,7 @@ const Resource = require("../models/Resource");
 
 router.get("/", async (req, res) => {
     const alerts = await Alert.find();
+    alert("chala yaha tk alert route");
     res.json(alerts);
 });
 

@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Coin = require("../models/Coin");
+const verifyToken = require("../middleware/verifyToken");
 
 // POST /api/signup
 router.post("/signup", async (req, res) => {
@@ -59,13 +60,12 @@ router.post("/login", async (req, res) => {
     });
 
     // ✅ Set cookie
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // true in production
-        sameSite: "Lax", // or "Strict"
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      })
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
       .status(200)
       .json({
         message: "Login successful",
@@ -85,7 +85,7 @@ router.post("/login", async (req, res) => {
 // for auto login
 router.get("/verify", (req, res) => {
   const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  if (!token) return res.status(401).json({ message: "Unauthorized kshitij" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -102,5 +102,10 @@ router.post("/logout", (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 });
 
+
+router.get("/verify", verifyToken, (req, res) => {
+  // now req.user is available from the middleware
+  res.status(200).json({ user: req.user });
+});
 
 module.exports = router;

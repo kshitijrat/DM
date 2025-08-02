@@ -66,6 +66,7 @@ app.use("/api/coin", coinRoutes);
 
 app.get("/", (req, res) => {
   res.send("✅ Disaster Alert Backend is running!");
+  alert("message")
 });
 
 // ✅ IoT Sensor Data Route
