@@ -17,6 +17,14 @@ const coinRoutes = require("./routes/coin");
 const app = express();
 const server = http.createServer(app); // Create HTTP server
 
+// server.js ya app.js me
+const path = require("path");
+app.use(express.static(path.join(__dirname, "frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend/dist", "index.html"));
+});
+
 console.log("✅ .env loaded, atlas_url =", process.env.atlas_url);
 
 // ✅ Connect to MongoDB
