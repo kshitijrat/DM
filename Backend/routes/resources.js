@@ -20,7 +20,7 @@ router.post("/add-resource", async (req, res) => {
         await coinEntry.save();
         console.log("Updated coinEntry:", coinEntry);
       } else {
-        console("coin create: ");
+        console.log("coin create: ");
         await Coin.create({ email, coins: 1 });
       }
     }
