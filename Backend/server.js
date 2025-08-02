@@ -56,6 +56,7 @@ app.use((req, res, next) => {
 });
 
 
+
 // ✅ Routes
 app.use("/api", authRoutes);
 app.use("/api/alerts", alertRoutes);
@@ -81,6 +82,10 @@ app.post("/api/sensor-data", (req, res) => {
   io.emit("newSensorData", { sensorType, vibration, timestamp: new Date() });
 
   res.json({ message: "Sensor data received" });
+});
+
+app.get("/test", (req, res) => {
+  res.json({ msg: "CORS working" });
 });
 
 // ✅ Start server

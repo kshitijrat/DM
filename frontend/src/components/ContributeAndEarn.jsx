@@ -1,5 +1,6 @@
 import { Lightbulb, DollarSign, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const ContributeAndEarn = () => {
   return (
@@ -35,9 +36,11 @@ const ContributeAndEarn = () => {
       </ul>
 
       <div className="flex justify-center">
-        <button className="px-6 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:scale-105 transition">
-          Start Contributing
-        </button>
+        <Link to="/provide-resources"> {/* ✅ Wrap button inside Link */}
+          <button className="px-6 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:scale-105 transition">
+            Start Contributing
+          </button>
+        </Link>
       </div>
     </motion.div>
   );
