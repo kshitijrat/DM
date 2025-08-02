@@ -90,7 +90,7 @@ const ProvideResources = () => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/provide/add-resource", {
+      await axios.post("https://dm-backend-auge.onrender.com/api/provide/add-resource", {
         ...formData,
         phone: fullPhone,
       });
@@ -136,7 +136,7 @@ const ProvideResources = () => {
     let admin_id = prompt("Enter Admin Id");
     if (admin_id == 111) {
       try {
-        const response = await axios.delete(`http://localhost:5000/api/seek/delete-resource/${id}`);
+        const response = await axios.delete(`https://dm-backend-auge.onrender.com/api/seek/delete-resource/${id}`);
         alert(response.data.message);
         alert("Deleted successfully");
       } catch (error) {

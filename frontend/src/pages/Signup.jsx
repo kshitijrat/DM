@@ -114,7 +114,7 @@ const Signup = ({ language, setLanguage }) => {
       
 
       // ✅ Now auto-login
-      const loginRes = await fetch("http://localhost:5000/api/login", {
+      const loginRes = await fetch("https://dm-backend-auge.onrender.com/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Important for cookies!

@@ -84,7 +84,7 @@ const SeekResources = ({ language = "en", setLanguage }) => {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:5000/api/seek/seek-resource", formData);
+      await axios.post("https://dm-backend-auge.onrender.com/api/seek/seek-resource", formData);
       toast({
         title: "Request Submitted!",
         description: "Your request has been submitted successfully. Thank you!",
