@@ -40,6 +40,7 @@ const Profile = () => {
           const res = await fetch(`http://localhost:5000/api/coin/get-coins/${user.email}`);
           const data = await res.json();
           setCoinCount(data.coins || 0);
+          console.log("username: ",user.name)
         } else {
           const guestCoins = localStorage.getItem("guestCoins");
           if (guestCoins) setCoinCount(Number(guestCoins));
@@ -117,7 +118,7 @@ const Profile = () => {
             {user?.name ? user.name.charAt(0).toUpperCase() : "G"}
           </div>
           <div>
-            <h2 className="text-3xl sm:text-4xl dark:text-yellow-400 font-bold">{user?.name || "Guest User"}</h2>
+            <h2 className="text-3xl sm:text-4xl dark:text-yellow-400 font-bold">{user?.name}</h2>
             <p className="text-orange-500 dark:text-yellow-300 text-sm mt-1">{user?.email || "guest@example.com"}</p>
             <div className="flex items-center mt-2 text-orange-500 dark:text-yellow-200 text-sm">
               <MapPin size={18} />

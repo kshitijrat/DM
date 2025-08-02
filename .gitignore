@@ -1,1 +1,34 @@
-node_modules
+# 👉 Node modules
+node_modules/
+
+# 👉 Env variables
+.env
+
+# 👉 Log files
+*.log
+logs/
+npm-debug.log*
+
+# 👉 Build files
+dist/
+build/
+
+# 👉 System files
+.DS_Store
+Thumbs.db
+
+# 👉 IDE/editor settings
+.vscode/
+.idea/
+
+# 👉 Production keys
+.env.production
+
+# 👉 Optional: React specific
+*.env.local
+.env.development
+.env.test
+.env.*
+
+# 👉 Optional: OS-related
+*.swp

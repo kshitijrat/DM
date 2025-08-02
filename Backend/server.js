@@ -19,6 +19,8 @@ const coinRoutes = require("./routes/coin");
 const app = express();
 const server = http.createServer(app); // Create HTTP server
 
+console.log("✅ .env loaded, atlas_url =", process.env.atlas_url);
+
 // ✅ Connect to MongoDB
 connectDB();
 

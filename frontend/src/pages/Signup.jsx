@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { Eye, EyeOff, UserPlus, ArrowLeft } from "lucide-react"
 import Navbar from "../components/Navbar"
 import { toast } from "../components/ui/Toaster"
+import { useAuth } from "../context/AuthContext"
 
 const Signup = ({ language, setLanguage }) => {
   const navigate = useNavigate()
@@ -18,6 +19,7 @@ const Signup = ({ language, setLanguage }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const { user, setUser } = useAuth();
 
   // Translations
   const translations = {
@@ -82,7 +84,7 @@ const Signup = ({ language, setLanguage }) => {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
- 
+
   const handleSignup = async (e) => {
     e.preventDefault()
 
@@ -91,33 +93,55 @@ const Signup = ({ language, setLanguage }) => {
     setLoading(true)
 
     try {
-  const res = await fetch("http://localhost:5000/api/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-    }),
-  });
+      const res = await fetch("http://localhost:5000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-  const data = await res.json();
+      const data = await res.json();
 
-  if (!res.ok) {
-    toast(data.message || "Signup failed", "error");
-    setLoading(false);
-    return;
-  }
+      if (!res.ok) {
+        toast(data.message || "Signup failed", "error");
+        setLoading(false);
+        return;
+      }
 
-  localStorage.setItem("token", data.token);
-  toast("Account created successfully!", "success");
-  navigate("/");
-} catch (err) {
-  console.error(err);
-  toast("Something went wrong. Please try again.", "error");
-} finally {
-  setLoading(false);
-}
+      // ✅ Now auto-login
+      const loginRes = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Important for cookies!
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const loginData = await loginRes.json();
+
+      if (!loginRes.ok) {
+        toast("Signup succeeded but auto-login failed", "error");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Set user in context (optional: implement user context if needed)
+      setUser(loginData.user);
+
+      localStorage.setItem("token", data.token);
+      toast("Account created successfully!", "success");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      toast("Something went wrong. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
 
 
   }

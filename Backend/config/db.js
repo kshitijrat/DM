@@ -3,7 +3,9 @@ require("dotenv").config();
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
+        // console.log("🌐 process.env:", process.env); // Check full object
+        console.log("🧪 atlas_url:", process.env.atlas_url); // Should not be undefined
+        const conn = await mongoose.connect(process.env.atlas_url);
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
         console.error(`❌ MongoDB Connection Error: ${error.message}`);
