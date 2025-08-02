@@ -43,7 +43,7 @@ const LocationPermissionChecker = () => {
       {showDialog && (
         <div className="fixed inset-0 flex items-center justify-center  bg-opacity-80 z-50">
           <div className="bg-white dark:bg-black p-6 rounded-xl shadow-xl max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-2 text-white">Location Permission Denied</h2>
+            <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Location Permission Denied</h2>
             <p className="text-sm mb-4 text-gray-700 dark:text-gray-400">
               Please allow location access in your browser settings to get real time updates.
             </p>
