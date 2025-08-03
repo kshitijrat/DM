@@ -16,7 +16,7 @@ const MapIcon = () => {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileTap={{ scale: 0.9 }}
-        className={`fixed bottom-6 right-6 z-[60] p-3 rounded-full shadow-xl text-white transition-all ${
+        className={`fixed bottom-20 right-2 z-[60] p-3 rounded-full shadow-xl text-white transition-all ${
           isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
         }`}
         title={isOpen ? 'Close Map' : 'Open Map'}

@@ -6,6 +6,7 @@ import { Home, AlertTriangle, Search, HandHeart, LogIn, UserPlus, Menu, X, Globe
 import io from "socket.io-client";
 import { useNotifications } from "../components/NotificationContext";
 import { useAuth } from "../context/AuthContext";
+import BottomNav from "./BottomNav";
 
 const Navbar = ({ language, setLanguage }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -77,7 +78,7 @@ const Navbar = ({ language, setLanguage }) => {
   }
 
   return (
-    <nav
+    <><nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-gray-50 dark:bg-[#0d1117] backdrop-blur-md shadow-md" : "bg-white dark:bg-gray-900"}`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,48 +232,11 @@ const Navbar = ({ language, setLanguage }) => {
         className={`md:hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"}`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 shadow-lg">
-          <MobileNavLink
-            to="/"
-            isActive={isActive("/")}
-            icon={<Home size={18} />}
-            label="Home"
-            onClick={() => setIsOpen(false)}
-          />
-          <MobileNavLink
-            to="/disaster-alerts"
-            isActive={isActive("/disaster-alerts")}
-            icon={<AlertTriangle size={18} />}
-            label="Alerts"
-            onClick={() => setIsOpen(false)}
-          />
-          <MobileNavLink
-            to="/seek-resources"
-            isActive={isActive("/seek-resources")}
-            icon={<Search size={18} />}
-            label="Seek Help"
-            onClick={() => setIsOpen(false)}
-          />
-          <MobileNavLink
-            to="/provide-resources"
-            isActive={isActive("/provide-resources")}
-            icon={<HandHeart size={18} />}
-            label="Provide Help"
-            onClick={() => setIsOpen(false)} />
-
-          <MobileNavLink
-            to="/profile"
-            isActive={isActive("/profile")}
-            icon={<HandHeart size={18} />}
-            label="Profile+"
-            onClick={() => setIsOpen(false)}
-          />
-
 
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between px-4">
               <div className="flex items-center space-x-4">
-                {/* Language selector */}
-                {/* temporary i removed this  */}
+
 
                 {/* Dark mode toggle */}
                 <button
@@ -288,17 +252,16 @@ const Navbar = ({ language, setLanguage }) => {
               </div>
 
               {/* Notification */}
-              <div className="px-4 relative" ref={notifRef}>
+              <div className=" relative" ref={notifRef}>
                 <button
                   onClick={() => setIsNotifOpen(!isNotifOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  className="p-2 relative rounded-full hover:bg-gray-200"
+                  aria-label="Notifications"
                 >
-                  <div className="flex items-center space-x-2">
-                    <Bell size={18} />
-                    <span>Notifications</span>
-                  </div>
+
+                  <Bell size={20} className="text-gray-700" />
                   {unreadCount > 0 && (
-                    <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-red-500 text-white rounded-full">
+                    <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
                       {unreadCount}
                     </span>
                   )}
@@ -306,7 +269,7 @@ const Navbar = ({ language, setLanguage }) => {
 
                 {/* Notification Drop Down  */}
                 {isNotifOpen && (
-                  <div className="mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-80">
+                  <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-50 overflow-auto max-h-80">
                     {notifications.length === 0 ? (
                       <p className="p-4 text-gray-500 dark:text-gray-400 text-center">No notifications</p>
                     ) : (
@@ -366,6 +329,11 @@ const Navbar = ({ language, setLanguage }) => {
         </div>
       </div>
     </nav>
+
+      <BottomNav />
+
+    </>
+
   )
 }
 
