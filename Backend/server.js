@@ -25,10 +25,29 @@ console.log("✅ .env loaded, atlas_url =", process.env.atlas_url);
 connectDB();
 
 // ✅ Middlewares
+const allowedOrigins = [
+  "https://dm-frontend-t8vb.onrender.com", // production
+  "https://dm-frontend-t8vb.onrender.com/login",         // add more as needed
+  "https://dm-frontend-t8vb.onrender.com/signup", 
+  "https://dm-frontend-t8vb.onrender.com/disaster-alerts",
+  "https://dm-frontend-t8vb.onrender.com/seek-resources",
+  "https://dm-frontend-t8vb.onrender.com/provide-resources",
+  "https://dm-frontend-t8vb.onrender.com/profile",
+];
+
 app.use(cors({
-  origin: "https://dm-frontend-t8vb.onrender.com", // your frontend dev URL
-  credentials: true,               // allow cookies to be sent
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser()); // ✅ Moved before routes
 
