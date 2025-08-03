@@ -22,7 +22,12 @@ const MoveToLatestPosition = () => {
   const map = useMap();
 
   useEffect(() => {
-    if (path.length > 0) {
+    if (
+      map &&
+      Array.isArray(path) &&
+      path.length > 0 &&
+      Array.isArray(path[path.length - 1])
+    ) {
       map.setView(path[path.length - 1], map.getZoom(), { animate: true });
     }
   }, [path, map]);
@@ -30,13 +35,15 @@ const MoveToLatestPosition = () => {
   return null;
 };
 
+
+
 const NavigationMap = () => {
   const defaultCenter = [23.1765, 75.7885];
   const { path } = useContext(GeoContext);
 
   return (
-    <div className="p-1 dark:bg-gray-900 border-none">
-      <p className="text-sm dark:text-gray-50 mb-2 px-2">
+    <div className="p-1 bg-gray-50 dark:bg-[#0d1117] border-none">
+      <p className="text-sm dark:text-gray-50 p-1">
         This map tracks your path from the starting location to your current position in real-time, helping you navigate and find your way easily.
       </p>
       <MapContainer

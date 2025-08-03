@@ -1,8 +1,10 @@
 // src/components/SignupPromptDialog.jsx
 import { Dialog } from '@headlessui/react';
 import { GiftIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SignupPromptDialog = ({ open, onClose, redirectTo = "/signup" }) => {
+  const navigate = useNavigate(); // useNavigate hook
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
@@ -30,7 +32,7 @@ const SignupPromptDialog = ({ open, onClose, redirectTo = "/signup" }) => {
               className="px-4 py-2 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors flex items-center space-x-1"
               onClick={() => {
                 onClose();
-                window.location.href = redirectTo;
+                navigate(redirectTo); // use navigate instead of window.location.href
               }}
             >
               Go to Signup
