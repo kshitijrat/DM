@@ -27,12 +27,6 @@ connectDB();
 // ✅ Middlewares
 const allowedOrigins = [
   "https://dm-frontend-t8vb.onrender.com", // production
-  "https://dm-frontend-t8vb.onrender.com/login",         // add more as needed
-  "https://dm-frontend-t8vb.onrender.com/signup", 
-  "https://dm-frontend-t8vb.onrender.com/disaster-alerts",
-  "https://dm-frontend-t8vb.onrender.com/seek-resources",
-  "https://dm-frontend-t8vb.onrender.com/provide-resources",
-  "https://dm-frontend-t8vb.onrender.com/profile",
 ];
 
 app.use(cors({
