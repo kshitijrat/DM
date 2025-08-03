@@ -1,7 +1,7 @@
 "use client"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { useState,useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useContext } from "react"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
@@ -17,6 +17,8 @@ import { NotificationProvider } from "./components/NotificationContext" // ✅ F
 import Profile from "./pages/Profile"
 import { io } from "socket.io-client";
 import LocationPermissionChecker from "./hooks/LocationPermissionChecker"
+import useGeoTracker from "./hooks/useGeoTracker";
+import { GeoProvider, GeoContext } from "./context/GeoContext";
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -24,6 +26,17 @@ const App = () => {
   const handleLanguageChange = (lang) => {
     setLanguage(lang)
   }
+
+  const GeoTrackerWrapper = () => {
+    const pathFromHook = useGeoTracker();
+    const { setPath } = useContext(GeoContext);
+
+    useEffect(() => {
+      setPath(pathFromHook);
+    }, [pathFromHook, setPath]);
+
+    return null; // UI nahi dikhana
+  };
 
 
   const socketRef = useRef(null);
@@ -55,27 +68,30 @@ const App = () => {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <Router>
-          <ScrollToTop />
-          <div className="flex flex-col min-h-screen">
-            {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
-            <Navbar />
-            <LocationPermissionChecker />
-            <div className="flex-grow pt-16">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/disaster-alerts" element={<DisasterAlerts />} />
-                <Route path="/seek-resources" element={<SeekResources />} />
-                <Route path="/provide-resources" element={<ProvideResources />} />
-                <Route path="/profile" element={<Profile />} />
-              </Routes>
-              <MapIcon />
+        <GeoProvider>
+          <GeoTrackerWrapper /> {/* Ye hook se tracking kar ke context me store karega */}
+          <Router>
+            <ScrollToTop />
+            <div className="flex flex-col min-h-screen">
+              {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
+              <Navbar />
+              <LocationPermissionChecker />
+              <div className="flex-grow pt-16">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/disaster-alerts" element={<DisasterAlerts />} />
+                  <Route path="/seek-resources" element={<SeekResources />} />
+                  <Route path="/provide-resources" element={<ProvideResources />} />
+                  <Route path="/profile" element={<Profile />} />
+                </Routes>
+                <MapIcon />
+              </div>
+              <Footer language={language} />
             </div>
-            <Footer language={language} />
-          </div>
-        </Router>
+          </Router>
+        </GeoProvider>
       </NotificationProvider>
     </AuthProvider>
   )

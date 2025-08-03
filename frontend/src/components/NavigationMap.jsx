@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -9,80 +9,34 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { GeoContext } from "../context/GeoContext";
 
-// User marker icon
 const userIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149059.png",
   iconSize: [35, 35],
 });
 
-// Live tracker logic inside this helper component
-const TrackerLogic = ({ setPath }) => {
+// Helper component to move map view to latest location
+const MoveToLatestPosition = () => {
+  const { path } = useContext(GeoContext);
   const map = useMap();
-  const watchIdRef = useRef(null);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
+    if (path.length > 0) {
+      map.setView(path[path.length - 1], map.getZoom(), { animate: true });
     }
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        const newPoint = [latitude, longitude];
-
-        setPath((prevPath) => [...prevPath, newPoint]);
-
-        map.setView(newPoint, map.getZoom());
-      },
-      (err) => {
-        console.error("Geolocation error:", err);
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 10000,
-      }
-    );
-
-    return () => {
-      if (watchIdRef.current) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
-    };
-  }, [map, setPath]);
+  }, [path, map]);
 
   return null;
 };
 
-// Main LivePathTracker (without useMap directly)
-const LivePathTracker = () => {
-  const [path, setPath] = useState([]);
-
-  return (
-    <>
-      <TrackerLogic setPath={setPath} />
-
-      {/* Draw path */}
-      <Polyline positions={path} color="blue" />
-
-      {/* Show current marker */}
-      {path.length > 0 && (
-        <Marker position={path[path.length - 1]} icon={userIcon}>
-          <Popup>You are here</Popup>
-        </Marker>
-      )}
-    </>
-  );
-};
-
 const NavigationMap = () => {
   const defaultCenter = [23.1765, 75.7885];
+  const { path } = useContext(GeoContext);
 
   return (
-    <div>
-      <p className="text-sm text-gray-700 mb-2">
+    <div className="p-1 dark:bg-gray-900 border-none">
+      <p className="text-sm dark:text-gray-50 mb-2 px-2">
         This map tracks your path from the starting location to your current position in real-time, helping you navigate and find your way easily.
       </p>
       <MapContainer
@@ -96,7 +50,15 @@ const NavigationMap = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <LivePathTracker />
+        <Polyline positions={path} color="blue" />
+
+        {path.length > 0 && (
+          <Marker position={path[path.length - 1]} icon={userIcon}>
+            <Popup>You are here</Popup>
+          </Marker>
+        )}
+
+        <MoveToLatestPosition />
       </MapContainer>
     </div>
   );
