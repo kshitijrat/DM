@@ -32,7 +32,7 @@ const SignupPromptDialog = ({ open, onClose, redirectTo = "/signup" }) => {
               className="px-4 py-2 rounded-md bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors flex items-center space-x-1"
               onClick={() => {
                 onClose();
-                navigate(redirectTo); // use navigate instead of window.location.href
+                navigate("/provide-resources");
               }}
             >
               Go to Signup

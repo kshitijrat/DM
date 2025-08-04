@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 
 const ContributeAndEarn = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <motion.div
       className="bg-gradient-to-br from-yellow-50 to-white dark:from-gray-900 dark:to-gray-800 border border-yellow-300 dark:border-yellow-600 rounded-2xl shadow-lg p-6 md:p-8 mt-10 max-w-3xl mx-auto"
@@ -39,11 +39,11 @@ const navigate = useNavigate();
 
       <div className="flex justify-center">
         <button
-  className="px-6 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:scale-105 transition"
-  onClick={() => navigate("/provide-resources")}
->
-  Start Contributing
-</button>
+          className="px-6 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold shadow-md hover:scale-105 transition"
+          onClick={() => navigate("/provide-resources")}
+        >
+          Start Contributing
+        </button>
       </div>
     </motion.div>
   );
