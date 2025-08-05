@@ -2,14 +2,21 @@
 
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 
 // Fix default icon issue
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 })
@@ -37,7 +44,9 @@ const fetchWeather = async (lat, lon) => {
 
 const fetchLocationName = async (lat, lon) => {
   try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+    )
     return response.data.address || {}
   } catch (err) {
     return {}
@@ -79,12 +88,57 @@ const checkNearbyAreas = async (lat, lon) => {
   return { safe, unsafe }
 }
 
+// Earthquake data fetch with 300 km radius filter
+const fetchEarthquakeData = async (lat, lon) => {
+  try {
+    const res = await fetch(
+      "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+    )
+    const data = await res.json()
+
+    const filtered = data.features.filter((eq) => {
+      const eqLat = eq.geometry.coordinates[1]
+      const eqLon = eq.geometry.coordinates[0]
+      const distance = getDistanceFromLatLonInKm(lat, lon, eqLat, eqLon)
+      return distance <= 300
+    })
+
+    return filtered
+  } catch (err) {
+    console.error(err)
+    return []
+  }
+}
+
+// Haversine formula to calculate distance
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  const R = 6371 // km
+  const dLat = deg2rad(lat2 - lat1)
+  const dLon = deg2rad(lon2 - lon1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+function deg2rad(deg) {
+  return deg * (Math.PI / 180)
+}
+
 const SafeZoneMap = () => {
   const [status, setStatus] = useState("Checking safety...")
   const [location, setLocation] = useState(null)
   const [safeZones, setSafeZones] = useState([])
   const [unsafeZones, setUnsafeZones] = useState([])
+  const [earthquakes, setEarthquakes] = useState([])
   const [currentLocationName, setCurrentLocationName] = useState({})
+  const [showRoute, setShowRoute] = useState(false)
+
+  // Route coordinates (user loc -> nearest safe zone)
+  const [routeCoordinates, setRouteCoordinates] = useState([])
 
   useEffect(() => {
     const determineSafety = async () => {
@@ -103,6 +157,10 @@ const SafeZoneMap = () => {
 
           const currentWeather = await fetchWeather(latitude, longitude)
 
+          // Fetch earthquakes within 300km
+          const nearbyEarthquakes = await fetchEarthquakeData(latitude, longitude)
+          setEarthquakes(nearbyEarthquakes)
+
           if (currentWeather && !isDisaster(currentWeather)) {
             setStatus("You are in a safe zone.")
           } else {
@@ -113,6 +171,23 @@ const SafeZoneMap = () => {
 
             if (safe.length > 0) {
               setStatus("Safest zones found nearby:")
+
+              // Find nearest safe zone for route line
+              let nearestSafe = safe[0]
+              let minDist = getDistanceFromLatLonInKm(latitude, longitude, safe[0].lat, safe[0].lon)
+
+              for (let i = 1; i < safe.length; i++) {
+                const dist = getDistanceFromLatLonInKm(latitude, longitude, safe[i].lat, safe[i].lon)
+                if (dist < minDist) {
+                  nearestSafe = safe[i]
+                  minDist = dist
+                }
+              }
+
+              setRouteCoordinates([
+                [latitude, longitude],
+                [nearestSafe.lat, nearestSafe.lon],
+              ])
             } else {
               setStatus("No safe zones found nearby during disaster.")
             }
@@ -130,53 +205,92 @@ const SafeZoneMap = () => {
       <div className="mb-3 p-2 bg-yellow-100 border border-yellow-300 rounded">{status}</div>
 
       {location && (
-        <MapContainer center={[location.lat, location.lon]} zoom={8} style={{ height: "400px", width: "100%" }}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
+        <>
+          <MapContainer
+            center={[location.lat, location.lon]}
+            zoom={8}
+            style={{ height: "400px", width: "100%" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+            />
 
-          {/* Current location */}
-          <Marker position={[location.lat, location.lon]}>
-            <Popup>You are here</Popup>
-          </Marker>
-
-          {/* Safe Zones */}
-          {safeZones.map((zone, i) => (
-            <Marker
-              key={`safe-${i}`}
-              position={[zone.lat, zone.lon]}
-              icon={L.divIcon({
-                className: "safe-marker",
-                html: `<div style="background:green;border-radius:50%;width:16px;height:16px;"></div>`,
-              })}
-            >
-              <Popup>
-                {zone.name.city || "Unknown"}, {zone.temp}°C
-                <br />
-                Wind: {zone.windSpeed} m/s
-              </Popup>
+            {/* Current location */}
+            <Marker position={[location.lat, location.lon]}>
+              <Popup>You are here</Popup>
             </Marker>
-          ))}
 
-          {/* Unsafe Zones */}
-          {unsafeZones.map((zone, i) => (
-            <Marker
-              key={`unsafe-${i}`}
-              position={[zone.lat, zone.lon]}
-              icon={L.divIcon({
-                className: "unsafe-marker",
-                html: `<div style="background:red;border-radius:50%;width:16px;height:16px;"></div>`,
-              })}
+            {/* Safe Zones */}
+            {safeZones.map((zone, i) => (
+              <Marker
+                key={`safe-${i}`}
+                position={[zone.lat, zone.lon]}
+                icon={L.divIcon({
+                  className: "safe-marker",
+                  html: `<div style="background:green;border-radius:50%;width:16px;height:16px;"></div>`,
+                })}
+              >
+                <Popup>
+                  {zone.name.city || "Unknown"}, {zone.temp}°C
+                  <br />
+                  Wind: {zone.windSpeed} m/s
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* Unsafe Zones */}
+            {unsafeZones.map((zone, i) => (
+              <Marker
+                key={`unsafe-${i}`}
+                position={[zone.lat, zone.lon]}
+                icon={L.divIcon({
+                  className: "unsafe-marker",
+                  html: `<div style="background:red;border-radius:50%;width:16px;height:16px;"></div>`,
+                })}
+              >
+                <Popup>
+                  {zone.name.city || "Unknown"}, {zone.temp}°C
+                  <br />
+                  Wind: {zone.windSpeed} m/s
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* Earthquake markers (red dots with magnitude popup) */}
+            {earthquakes.map((eq, i) => {
+              const mag = eq.properties.mag
+              const coords = eq.geometry.coordinates
+              return (
+                <Marker
+                  key={`eq-${i}`}
+                  position={[coords[1], coords[0]]}
+                  icon={L.divIcon({
+                    className: "eq-marker",
+                    html: `<div style="background:red; border-radius:50%; width:16px; height:16px;" title="Magnitude: ${mag}"></div>`,
+                  })}
+                >
+                  <Popup>Magnitude: {mag}</Popup>
+                </Marker>
+              )
+            })}
+
+            {/* Polyline route user -> nearest safe zone */}
+            {showRoute && routeCoordinates.length === 2 && (
+              <Polyline positions={routeCoordinates} color="lightblue" />
+            )}
+          </MapContainer>
+
+          {/* Toggle route button */}
+          {routeCoordinates.length === 2 && (
+            <button
+              className="mt-3 px-4 py-2 bg-blue-600 text-white rounded"
+              onClick={() => setShowRoute(!showRoute)}
             >
-              <Popup>
-                {zone.name.city || "Unknown"}, {zone.temp}°C
-                <br />
-                Wind: {zone.windSpeed} m/s
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+              {showRoute ? "Hide Safe Zone Path" : "View Safe Zone Path"}
+            </button>
+          )}
+        </>
       )}
     </div>
   )
