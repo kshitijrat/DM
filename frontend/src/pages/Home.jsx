@@ -302,21 +302,21 @@ const Home = ({ language, setLanguage }) => {
         </div>
       )}
 
-      {/* Search Bar */}
-      <SearchBar placeholder_input="Entr Specific City Name" onLocationFound={handleLocationSearch} />
-
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mt-3 mx-auto px-4 py-2">
         <motion.div
           className="text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Search Bar */}
+          <SearchBar placeholder_input="Entr Specific City Name" onLocationFound={handleLocationSearch} />
+
           <h5
             className="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-300 text-center py-2"
           ><span id="title"></span></h5>
 
-          <p className="text-center text-gray-600 dark:text-gray-300 text-lg md:text-xl mt-2">
+          <p className="text-center text-gray-600 dark:text-gray-300 md:text-xl mt-2">
             <span>Empowering communities with accurate, real-time updates on disasters and emergencies — anytime, anywhere.</span>
           </p>
         </motion.div>
@@ -327,7 +327,7 @@ const Home = ({ language, setLanguage }) => {
 
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
-            <ErrorBoundary>
+
             <DisasterChart
               language={language}
               coordinates={
@@ -338,7 +338,6 @@ const Home = ({ language, setLanguage }) => {
               // coordinates={testCoordinates} // san francisco 
               locationName={searchedLocationDetails?.city}
             />
-            </ErrorBoundary>
             {/* iot sensor chart  */}
             {/* <IoTSensorChart en={language} /> */}
 

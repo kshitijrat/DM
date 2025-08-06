@@ -26,7 +26,8 @@ connectDB();
 
 // ✅ Middlewares
 const allowedOrigins = [
-  "https://dm-frontend-t8vb.onrender.com", // production
+  "https://dm-frontend-t8vb.onrender.com",
+  "http://localhost:5173/", // production
 ];
 
 app.use(cors({

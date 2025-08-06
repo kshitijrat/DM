@@ -51,10 +51,15 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
   const [trend, setTrend] = useState(0)
   const prevIntensity = useRef(0)
   const chartRef = useRef(null)
+  const [localCoordinates, setLocalCoordinates] = useState(null);
+  const [currLocationName, setcurrLocationName] = useState("");
+
+
+
 
   const translations = {
     en: {
-      title: "🌪️ Real-time Earthquake Intensity",
+      title: "🌪️ Predicted Earthquake Intensity",
       intensity: "Current Intensity",
       trend: "Trend",
       increasing: "Increasing",
@@ -66,20 +71,6 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
       tooltip: "Intensity",
       alertLevel: "Alert Level",
       action: "Recommended Action"
-    },
-    hi: {
-      title: "🌪️ रीयल-टाइम आपदा तीव्रता",
-      intensity: "वर्तमान तीव्रता",
-      trend: "प्रवृत्ति",
-      increasing: "बढ़ रही है",
-      decreasing: "घट रही है",
-      stable: "स्थिर",
-      update: "डेटा हर 6 सेकंड में अपडेट होता है",
-      yAxis: "तीव्रता (Mw)",
-      xAxis: "समय",
-      tooltip: "तीव्रता",
-      alertLevel: "चेतावनी स्तर",
-      action: "अनुशंसित कार्य"
     },
   }
 
@@ -121,41 +112,88 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
     return { level: "Emergency 🚨", icon: "🚨", action: "Show alert + SOS + Notify" }
   }
 
+  // try to get curr location
   useEffect(() => {
-    let intervalId
+    if (!coordinates) {
+      // Try to get browser location if coordinates prop missing
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => { // ✅ mark callback as async
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            setLocalCoordinates({ latitude, longitude });
+
+            const name = await fetchLocationName(latitude, longitude); // ✅ await now works
+            setcurrLocationName(name);
+          },
+
+          (error) => {
+            console.warn("Geolocation error:", error);
+            setLocalCoordinates(null);
+          }
+        );
+      } else {
+        console.warn("Geolocation not supported by this browser.");
+        setLocalCoordinates(null);
+      }
+
+    }
+  }, [coordinates]);
+
+  // console local coordinates
+  useEffect(() => {
+    if (localCoordinates) {
+      console.log("Updated localCoordinates:", localCoordinates);
+    }
+  }, [localCoordinates]);
+
+  // fetch and update 
+  useEffect(() => {
+    const activeCoords = coordinates || localCoordinates;
+
 
     const fetchAndUpdate = async () => {
       try {
-        const endTime = new Date().toISOString().split("T")[0]
-        const startTime = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+        const endTime = new Date().toISOString().split("T")[0];
+        const startTime = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
-        let url = ""
+        let url = "";
 
-        if (coordinates) {
-          const { latitude, longitude } = coordinates
-          const radius = 300 // in KM
+        if (activeCoords?.latitude && activeCoords?.longitude) {
+          const { latitude, longitude } = activeCoords;
+          const radius = 300;
 
-          url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${latitude}&longitude=${longitude}&maxradiuskm=${radius}&starttime=${startTime}&endtime=${endTime}`
+          url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=${latitude}&longitude=${longitude}&maxradiuskm=${radius}&starttime=${startTime}&endtime=${endTime}&minmagnitude=3`;
         } else {
-          url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startTime}&endtime=${endTime}`
+          url = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startTime}&endtime=${endTime}&minmagnitude=3`;
         }
 
-        const res = await fetch(url)
-        const data = await res.json()
-        // console.log("Earthquake API Data:", data)
+        console.log("Fetching from URL:", url);
 
-        const avgMag = calculateAvgMagnitude(data.features, coordinates)
-        const currentTime = new Date().toLocaleTimeString()
-        const diff = avgMag - prevIntensity.current
-        setTrend(diff)
-        prevIntensity.current = avgMag
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error(`API Error ${res.status}: ${errorText}`);
+          return;
+        }
 
-        const roundedMag = parseFloat(avgMag.toFixed(2))
-        setCurrentIntensity(roundedMag)
-        setAlertInfo(getAlertLevel(roundedMag))
+        const data = await res.json();
+
+        const avgMag = calculateAvgMagnitude(data.features, activeCoords);
+        // rest remains same...
+
+        const currentTime = new Date().toLocaleTimeString();
+        const diff = avgMag - prevIntensity.current;
+        setTrend(diff);
+        prevIntensity.current = avgMag;
+
+        const roundedMag = parseFloat(avgMag.toFixed(2));
+        setCurrentIntensity(roundedMag);
+        setAlertInfo(getAlertLevel(roundedMag));
 
         if (window.navigator.vibrate && roundedMag >= 4.5) {
-          window.navigator.vibrate([300, 200, 300])
+          window.navigator.vibrate([300, 200, 300]);
         }
 
         setChartData((prev) => ({
@@ -166,18 +204,38 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
               data: [...prev.datasets[0].data, avgMag].slice(-12),
             },
           ],
-        }))
+        }));
       } catch (error) {
-        console.error("Failed to fetch earthquake data:", error)
+        console.error("Failed to fetch earthquake data:", error);
       }
+    };
+
+
+
+    fetchAndUpdate();
+    const intervalId = setInterval(fetchAndUpdate, 6000);
+    return () => clearInterval(intervalId);
+  }, [coordinates, localCoordinates]);
+
+  // try to fet location name using lat & lon
+  const fetchLocationName = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+
+      console.log("Location info:", data);
+
+      const locationName = data.address.city || data.address.town || data.address.village || data.address.state;
+      // console.log("locationname: ", );
+      return locationName || "Unknown Location";
+    } catch (error) {
+      console.error("Failed to fetch location name:", error);
+      return "Unknown Location";
     }
+  };
 
-
-
-    fetchAndUpdate()
-    intervalId = setInterval(fetchAndUpdate, 6000)
-    return () => clearInterval(intervalId)
-  }, [coordinates])
 
   const getTrendIcon = () => trend > 0.05
     ? <ArrowUpRight className="w-4 h-4 text-green-500" />
@@ -187,15 +245,15 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
 
   const getTrendText = () => trend > 0.05 ? t.increasing : trend < -0.05 ? t.decreasing : t.stable
   const getTrendColor = () => trend > 0.05 ? "text-green-500" : trend < -0.05 ? "text-red-500" : "text-gray-400"
-
+  const finalLocationName = locationName || currLocationName || "";
   return (
     <motion.div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 w-full mx-auto" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
 
       <div className="flex items-center justify-between mb-4">
 
-        <h2 className="text-2xl font-semibold text-red-600 dark:text-red-400">
-          {t.title} {locationName && ` - ${locationName}`}
-        </h2>
+        <h4 className="text-xl font-semibold text-red-600 dark:text-red-400">
+          {t.title}{finalLocationName && ` - ${finalLocationName}`}
+        </h4>
         <TooltipProvider_cus>
           <Tooltip_cus delayDuration={0}>
             <TooltipTrigger_cus asChild>
@@ -280,7 +338,8 @@ const DisasterChart = ({ language, coordinates = null, locationName = "" }) => {
         }} />
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 p-2 text-center">{t.update}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 p-2 text-center">Data calculate every 6 second</p>
+      <p className="text-sm text-red-400 p-2 text-justify"> <h3>Note:</h3> This data is an estimate based on recent earthquakes and may not be fully accurate.</p>
     </motion.div>
   )
 }

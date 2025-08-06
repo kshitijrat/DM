@@ -6,18 +6,17 @@ import {
   Sunrise, Sunset, Cloud
 } from "lucide-react"
 
-const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExternalWeather, language, setCountryCode }) => {
-  const [weather, setWeather] = useState(null)
+const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language }) => {
+  const [forecast, setForecast] = useState(null)  // store 5-day forecast
+  const [selectedDate, setSelectedDate] = useState(null) // date string 'YYYY-MM-DD'
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [weatherFetched, setWeatherFetched] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
 
   const translations = useMemo(() => ({
     en: {
-      title: "Current Weather",
-      location: "Location",
-      temperature: "Temperature",
+      title: "Weather Forecast",
+      selectDay: "Select Day",
       feelsLike: "Feels Like",
       humidity: "Humidity",
       pressure: "Pressure",
@@ -25,17 +24,16 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
       windSpeed: "Wind Speed",
       windDirection: "Wind Direction",
       cloudiness: "Cloudiness",
-      sunrise: "Sunrise",
-      sunset: "Sunset",
       loading: "Loading weather...",
       error: "Failed to fetch weather data.",
       permissionDenied: "Permission denied or location unavailable.",
       notSupported: "Geolocation not supported by this browser.",
+      today: "Today",
+      tomorrow: "Tomorrow"
     },
     hi: {
-      title: "वर्तमान मौसम",
-      location: "स्थान",
-      temperature: "तापमान",
+      title: "मौसम पूर्वानुमान",
+      selectDay: "दिन चुनें",
       feelsLike: "अनुभव",
       humidity: "आर्द्रता",
       pressure: "दबाव",
@@ -43,12 +41,12 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
       windSpeed: "हवा की गति",
       windDirection: "हवा की दिशा",
       cloudiness: "बादल",
-      sunrise: "सूर्योदय",
-      sunset: "सूर्यास्त",
       loading: "मौसम लोड हो रहा है...",
       error: "मौसम डेटा प्राप्त करने में विफल।",
       permissionDenied: "अनुमति अस्वीकृत या स्थान अनुपलब्ध।",
       notSupported: "इस ब्राउज़र द्वारा जियोलोकेशन समर्थित नहीं है।",
+      today: "आज",
+      tomorrow: "कल"
     },
   }), [])
 
@@ -58,23 +56,22 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
     const isCurrentlyOnline = navigator.onLine
     setIsOnline(isCurrentlyOnline)
 
-    const fetchWeather = async (lat, lon) => {
+    const fetchForecast = async (lat, lon) => {
       setLoading(true)
+      setError(null)
       try {
         const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=9cfd85c582df09ab769763b0095ed07c`
         )
-        setWeather(response.data)
-        setWeatherFetched(true)
-
-        localStorage.setItem("cachedWeather", JSON.stringify(response.data))
-        localStorage.setItem("lastUpdated", new Date().toISOString())
-
-        if (setExternalWeather) setExternalWeather(response.data)
-        if (setCountryCode) setCountryCode(response.data.sys.country)
+        setForecast(response.data)
+        // Set default selected date as first date available
+        if (response.data && response.data.list.length > 0) {
+          const firstDate = response.data.list[0].dt_txt.split(" ")[0]
+          setSelectedDate(firstDate)
+        }
       } catch (err) {
         setError(t.error)
-        console.log("error:", err)
+        console.error(err)
       } finally {
         setLoading(false)
       }
@@ -88,9 +85,10 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
         )
         if (geo.data && geo.data.length > 0) {
           const { lat, lon } = geo.data[0]
-          fetchWeather(lat, lon)
+          fetchForecast(lat, lon)
         } else {
           setError("Location not found")
+          setLoading(false)
         }
       } catch (err) {
         setError("Failed to geocode location")
@@ -100,12 +98,12 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
 
     if (isCurrentlyOnline) {
       if (externalLat != null && externalLon != null) {
-        fetchWeather(externalLat, externalLon)
+        fetchForecast(externalLat, externalLon)
       } else if (externalLocationName) {
         fetchFromName(externalLocationName)
       } else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          ({ coords }) => fetchWeather(coords.latitude, coords.longitude),
+          ({ coords }) => fetchForecast(coords.latitude, coords.longitude),
           () => {
             setError(t.permissionDenied)
             setLoading(false)
@@ -116,24 +114,39 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
         setLoading(false)
       }
     } else {
-      const cached = localStorage.getItem("cachedWeather")
-      if (cached) {
-        setWeather(JSON.parse(cached))
-        setWeatherFetched(true)
-      } else {
-        setError(t.permissionDenied)
-      }
+      setError("Offline mode not supported for forecast")
       setLoading(false)
     }
-  }, [externalLat, externalLon, externalLocationName, setExternalWeather, setCountryCode, language])
+  }, [externalLat, externalLon, externalLocationName, language])
 
+  // Helper to get wind direction from degrees
   const getWindDirection = (degrees) => {
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     const index = Math.round(degrees / 45) % 8
     return directions[index]
   }
 
-  if (!weatherFetched && loading) {
+  // Group forecast items by date
+  const dailyForecasts = useMemo(() => {
+    if (!forecast) return {}
+
+    return forecast.list.reduce((acc, item) => {
+      const date = item.dt_txt.split(" ")[0]
+      if (!acc[date]) acc[date] = []
+      acc[date].push(item)
+      return acc
+    }, {})
+  }, [forecast])
+
+  // Pick one item to display for selectedDate (e.g. midday forecast or closest to 12:00:00)
+  const selectedDayForecast = useMemo(() => {
+    if (!selectedDate || !dailyForecasts[selectedDate]) return null
+    // Try to find 12:00:00 forecast
+    const middayForecast = dailyForecasts[selectedDate].find(i => i.dt_txt.includes("12:00:00"))
+    return middayForecast || dailyForecasts[selectedDate][0]
+  }, [selectedDate, dailyForecasts])
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg p-6">
         <div className="flex flex-col items-center">
@@ -152,6 +165,18 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
     )
   }
 
+  // Format date label for dropdown (Today, Tomorrow, or weekday)
+  const formatDateLabel = (dateStr, index) => {
+    const today = new Date()
+    const date = new Date(dateStr)
+    const diffDays = Math.floor((date - today) / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return t.today
+    if (diffDays === 1) return t.tomorrow
+
+    return date.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })
+  }
+
   return (
     <motion.div
       className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden"
@@ -159,35 +184,50 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, setExtern
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {weather && (
+      <div className="p-4">
+        <label htmlFor="day-select" className="block mb-2 font-semibold text-gray-700 dark:text-gray-300">{t.selectDay}:</label>
+        <select
+          id="day-select"
+          className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          value={selectedDate || ""}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        >
+          {Object.keys(dailyForecasts).map((dateStr, idx) => (
+            <option key={dateStr} value={dateStr}>
+              {formatDateLabel(dateStr, idx)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {selectedDayForecast && (
         <>
           <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-2xl font-bold">{weather.name} {isOnline ? "🌐" : "📴"}</h3>
-                <p className="text-lg">{weather.weather[0].description}</p>
-                <p className="text-3xl font-bold mt-2">{Math.round(weather.main.temp)}°C</p>
+                <h3 className="text-2xl font-bold">{forecast.city.name} {isOnline ? "🌐" : "📴"}</h3>
+                <p className="text-lg capitalize">{selectedDayForecast.weather[0].description}</p>
+                <p className="text-3xl font-bold mt-2">{Math.round(selectedDayForecast.main.temp)}°C</p>
               </div>
               <div className="flex flex-col items-center">
                 <img
-                  src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+                  src={`http://openweathermap.org/img/wn/${selectedDayForecast.weather[0].icon}@2x.png`}
                   alt="weather-icon"
                   className="w-20 h-20"
                 />
-                <p className="text-sm">{weather.weather[0].main}</p>
+                <p className="text-sm capitalize">{selectedDayForecast.weather[0].main}</p>
               </div>
             </div>
           </div>
 
           <div className="p-6 grid grid-cols-2 gap-4">
-            <WeatherItem icon={<Thermometer className="w-5 h-5 text-red-500" />} label={t.feelsLike} value={`${Math.round(weather.main.feels_like)}°C`} />
-            <WeatherItem icon={<Droplets className="w-5 h-5 text-blue-500" />} label={t.humidity} value={`${weather.main.humidity}%`} />
-            <WeatherItem icon={<Gauge className="w-5 h-5 text-purple-500" />} label={t.pressure} value={`${weather.main.pressure} hPa`} />
-            <WeatherItem icon={<Wind className="w-5 h-5 text-cyan-500" />} label={t.windSpeed} value={`${weather.wind.speed} m/s`} />
-            <WeatherItem icon={<CloudRain className="w-5 h-5 text-gray-500" />} label={t.windDirection} value={`${weather.wind.deg}° (${getWindDirection(weather.wind.deg)})`} />
-            <WeatherItem icon={<Cloud className="w-5 h-5 text-gray-500" />} label={t.cloudiness} value={`${weather.clouds.all}%`} />
-            <WeatherItem icon={<Sunrise className="w-5 h-5 text-yellow-500" />} label={t.sunrise} value={new Date(weather.sys.sunrise * 1000).toLocaleTimeString()} />
-            <WeatherItem icon={<Sunset className="w-5 h-5 text-orange-500" />} label={t.sunset} value={new Date(weather.sys.sunset * 1000).toLocaleTimeString()} />
+            <WeatherItem icon={<Thermometer className="w-5 h-5 text-red-500" />} label={t.feelsLike} value={`${Math.round(selectedDayForecast.main.feels_like)}°C`} />
+            <WeatherItem icon={<Droplets className="w-5 h-5 text-blue-500" />} label={t.humidity} value={`${selectedDayForecast.main.humidity}%`} />
+            <WeatherItem icon={<Gauge className="w-5 h-5 text-purple-500" />} label={t.pressure} value={`${selectedDayForecast.main.pressure} hPa`} />
+            <WeatherItem icon={<Wind className="w-5 h-5 text-cyan-500" />} label={t.windSpeed} value={`${selectedDayForecast.wind.speed} m/s`} />
+            <WeatherItem icon={<CloudRain className="w-5 h-5 text-gray-500" />} label={t.windDirection} value={`${selectedDayForecast.wind.deg}° (${getWindDirection(selectedDayForecast.wind.deg)})`} />
+            <WeatherItem icon={<Cloud className="w-5 h-5 text-gray-500" />} label={t.cloudiness} value={`${selectedDayForecast.clouds.all}%`} />
+            {/* Sunrise & sunset are not available in forecast data, only current weather data */}
           </div>
         </>
       )}

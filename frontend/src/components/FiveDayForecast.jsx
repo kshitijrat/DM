@@ -4,7 +4,7 @@ import {
   Tooltip_cus,
   TooltipTrigger_cus,
   TooltipContent_cus,
-} from "../components/ui/tooltip"
+} from "../components/ui/tooltip";
 
 const FiveDayForecast = ({ lat, lon }) => {
   const [forecast, setForecast] = useState(null);
@@ -37,9 +37,38 @@ const FiveDayForecast = ({ lat, lon }) => {
   if (error) return <p>Error loading forecast: {error}</p>;
   if (!forecast) return null;
 
-  const dailyForecasts = forecast.list.filter((item) =>
-    item.dt_txt.includes("12:00:00")
-  );
+  // ✅ Group forecast data by date
+  const groupForecastsByDay = (list) => {
+    const grouped = {};
+
+    list.forEach((entry) => {
+      const date = new Date(entry.dt * 1000).toISOString().split("T")[0];
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(entry);
+    });
+
+    // Return array of daily summaries
+    return Object.entries(grouped).map(([date, entries]) => {
+      const temps = entries.map(e => e.main.temp);
+      const maxTemp = Math.max(...temps);
+      const minTemp = Math.min(...temps);
+
+      return {
+        date,
+        maxTemp,
+        minTemp,
+        weather: entries[0].weather[0],
+        humidity: entries[0].main.humidity,
+        wind: entries[0].wind.speed,
+        pressure: entries[0].main.pressure,
+        feels_like: entries[0].main.feels_like,
+      };
+    }).slice(0, 5); // Only keep 5 days
+  };
+
+  const dailyForecasts = groupForecastsByDay(forecast.list);
 
   return (
     <TooltipProvider_cus>
@@ -47,37 +76,37 @@ const FiveDayForecast = ({ lat, lon }) => {
         <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
           5-Day Weather Forecast
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {dailyForecasts.slice(0, 5).map((day) => (
-            <Tooltip_cus key={day.dt} delayDuration={0}>
+        <div className="flex overflow-x-auto space-x-3 pb-2">
+          {dailyForecasts.map((day) => (
+            <Tooltip_cus key={day.date} delayDuration={0}>
               <TooltipTrigger_cus asChild>
-                <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-md text-center cursor-pointer">
+                <div className="min-w-[120px] bg-gray-100 dark:bg-gray-700 p-3 rounded-md text-center cursor-pointer flex-shrink-0">
                   <p className="font-medium text-gray-900 dark:text-gray-100">
-                    {new Date(day.dt * 1000).toLocaleDateString(undefined, {
+                    {new Date(day.date).toLocaleDateString(undefined, {
                       weekday: "short",
                       day: "numeric",
                       month: "short",
                     })}
                   </p>
                   <img
-                    alt={day.weather[0].description}
-                    src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
+                    alt={day.weather.description}
+                    src={`https://openweathermap.org/img/wn/${day.weather.icon}@2x.png`}
                     className="mx-auto"
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {day.weather[0].main}
+                    {day.weather.main}
                   </p>
-                  <p className="text-gray-900 dark:text-gray-100 font-semibold">
-                    {Math.round(day.main.temp)}°C
+                  <p className="text-gray-900 dark:text-gray-100 font-semibold text-sm">
+                    H: {Math.round(day.maxTemp)}°C | L: {Math.round(day.minTemp)}°C
                   </p>
                 </div>
               </TooltipTrigger_cus>
               <TooltipContent_cus side="bottom" className="w-64 p-3">
-                <p><strong>Humidity:</strong> {day.main.humidity}%</p>
-                <p><strong>Wind:</strong> {day.wind.speed} m/s</p>
-                <p><strong>Pressure:</strong> {day.main.pressure} hPa</p>
-                <p><strong>Feels like:</strong> {Math.round(day.main.feels_like)}°C</p>
-                <p><strong>Description:</strong> {day.weather[0].description}</p>
+                <p><strong>Humidity:</strong> {day.humidity}%</p>
+                <p><strong>Wind:</strong> {day.wind} m/s</p>
+                <p><strong>Pressure:</strong> {day.pressure} hPa</p>
+                <p><strong>Feels like:</strong> {Math.round(day.feels_like)}°C</p>
+                <p><strong>Description:</strong> {day.weather.description}</p>
               </TooltipContent_cus>
             </Tooltip_cus>
           ))}
