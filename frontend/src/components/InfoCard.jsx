@@ -22,7 +22,7 @@ const InfoCard = ({ title, value, icon: Icon, color = "red" }) => {
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 text-center relative overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-2xl p-2 text-center relative overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

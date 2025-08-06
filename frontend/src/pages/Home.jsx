@@ -20,11 +20,14 @@ import {
   Waves,
   Flame,
   Mountain,
+  LocationEditIcon,
+  MapPinHouse,
 } from "lucide-react"
 import { toast } from "../components/ui/Toaster"
 import Dumy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
 import SafeZoneMap from "../components/SafeZoneMap"
 import IoTSensorChart from "../components/IoTSensorChart"
+import Dummy_SafeZoneMap from "../testfiles/Dumy_SafeZoneMap"
 
 const Home = ({ language, setLanguage }) => {
   const [dashboardData, setDashboardData] = useState({
@@ -78,8 +81,8 @@ const Home = ({ language, setLanguage }) => {
   const t = translations[language] || translations.en
 
   const [searchedCoordinates, setSearchedCoordinates] = useState(null);
-  const [searchLocation, setSearchLocation] = useState("");
   const [searchedLocationDetails, setSearchedLocationDetails] = useState(null);
+  const [disasterTypes, setDisasterTypes] = useState([]);
 
   // for search bar of weaterh info 
   const handleLocationSearch = async (locationName) => {
@@ -98,18 +101,18 @@ const Home = ({ language, setLanguage }) => {
 
         // Save full address details from API response
         setSearchedLocationDetails(data[0].address);
-        // toast(`Showing results for "${locationName}"`, "success");
+        // console.log(searchLocation);
+        toast(`Showing results for "${locationName}"`, "success");
       } else {
         setSearchedLocationDetails(null);
         toast("Location not found", "error");
       }
     } catch (error) {
       setSearchedLocationDetails(null);
+      console.log(error);
       toast("Failed to fetch location", "error");
     }
   };
-
-  const [disasterTypes, setDisasterTypes] = useState([]);
 
   function getIconForType(type) {
     switch (type.toLowerCase()) {
@@ -154,6 +157,7 @@ const Home = ({ language, setLanguage }) => {
 
   // Helper: Calculate distance between two lat/lon points in km
   function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+
     const R = 6371; // Earth radius in km
     const dLat = ((lat2 - lat1) * Math.PI) / 180
     const dLon = ((lon2 - lon1) * Math.PI) / 180
@@ -191,6 +195,7 @@ const Home = ({ language, setLanguage }) => {
         })
       },
       (err) => {
+        console.log(err);
         toast("Could not get your location", "error")
       }
     )
@@ -266,6 +271,9 @@ const Home = ({ language, setLanguage }) => {
     toast(`${disaster.name} details loaded`, "info")
   }
 
+  const testCoordinates = { latitude: 37.7749, longitude: -122.4194 } // Tokyo
+
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0d1117] pt-16">
       <Navbar />
@@ -294,7 +302,10 @@ const Home = ({ language, setLanguage }) => {
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Search Bar */}
+      <SearchBar placeholder_input="Entr Specific City Name" onLocationFound={handleLocationSearch} />
+
+      <div className="container mx-auto px-4 py-2">
         <motion.div
           className="text-center mb-8"
           initial={{ opacity: 0, y: 20 }}
@@ -302,7 +313,7 @@ const Home = ({ language, setLanguage }) => {
           transition={{ duration: 0.5 }}
         >
           <h5
-            className="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-300 text-center py-4"
+            className="text-xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-300 text-center py-2"
           ><span id="title"></span></h5>
 
           <p className="text-center text-gray-600 dark:text-gray-300 text-lg md:text-xl mt-2">
@@ -310,66 +321,24 @@ const Home = ({ language, setLanguage }) => {
           </p>
         </motion.div>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 mb-8">
-          {loading ? (
-            <div className="col-span-full flex justify-center items-center py-8">
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-300">
-                  {t.loadingData}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <InfoCard
-                title={t.disastersDetected}
-                value={dashboardData.disastersDetected}
-                icon={AlertTriangle}
-                color="red"
-              />
-              <InfoCard
-                title={t.avgIntensity}
-                value={dashboardData.avgIntensity}
-                icon={TrendingUp}
-                color="orange"
-              />
-              <InfoCard
-                title={t.mostAffected}
-                value={dashboardData.mostAffectedArea}
-                icon={MapPin}
-                color="yellow"
-              />
-              <InfoCard
-                title={t.alertsToday}
-                value={dashboardData.alertsToday}
-                icon={Bell}
-                color="purple"
-              />
-              {/* New InfoCard for Nearby Disasters */}
-              <InfoCard
-                title={t.nearbyDisasterAlert}
-                value={
-                  nearbyDisasters.length > 0
-                    ? `${nearbyDisasters.length} disaster(s) nearby!`
-                    : t.noNearbyDisaster
-                }
-                icon={AlertTriangle}
-                color={nearbyDisasters.length > 0 ? "red" : "green"}
-              />
-            </>
-          )}
-        </div>
-
-
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Left Column - Chart */}
           <div className="lg:col-span-2">
-            <DisasterChart />
+            <ErrorBoundary>
+            <DisasterChart
+              language={language}
+              coordinates={
+                searchedCoordinates && searchedCoordinates.latitude && searchedCoordinates.longitude
+                  ? searchedCoordinates
+                  : null
+              }
+              // coordinates={testCoordinates} // san francisco 
+              locationName={searchedLocationDetails?.city}
+            />
+            </ErrorBoundary>
             {/* iot sensor chart  */}
             {/* <IoTSensorChart en={language} /> */}
 
@@ -416,47 +385,7 @@ const Home = ({ language, setLanguage }) => {
               </div>
             </motion.div>
 
-            {/* Map Toggle Button */}
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setShowMap(!showMap)}
-                className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors"
-              >
-                {showMap ? t.hideMap : t.viewMap}
-              </button>
-            </div>
-
-            {/* show real safe zone map  */}
-            {showMap && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-20 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
-              >
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                  {t.safeZones}
-                </h2>
-                {/* Legend */}
-                <div className="flex items-center gap-6 mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Safe Zone
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Unsafe Zone
-                    </span>
-                  </div>
-                </div>
-                <SafeZoneMap />
-              </motion.div>
-            )}
-
+            {/* show real safe zone map */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -465,7 +394,7 @@ const Home = ({ language, setLanguage }) => {
               className="mt-20 z-1 bg-white border-2 dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
             >
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
-                Sample Visualization of Safe Zones
+                {t.safeZones}
               </h2>
 
               {/* Legend */}
@@ -485,12 +414,59 @@ const Home = ({ language, setLanguage }) => {
               </div>
 
               {/* Map */}
-              <Dumy_SafeZoneMap />
+              <SafeZoneMap />
             </motion.div>
+
+
+
+
+            {/* Map Toggle Button */}
+            <div className="mt-2 py-3 text-center">
+              <button
+                onClick={() => setShowMap(!showMap)}
+                className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-colors"
+              >
+                {showMap ? "Hide" : "View Sample Dumy Map"}
+              </button>
+            </div>
+
+            {/* show dumy safe zone map  */}
+            {showMap && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-20 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
+              >
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                  Sample Visualization of Safe Zones
+                </h2>
+                {/* Legend */}
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Safe Zone
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Unsafe Zone
+                    </span>
+                  </div>
+                </div>
+                <Dummy_SafeZoneMap />
+              </motion.div>
+            )}
+
           </div>
 
           {/* Right Column - Weather and Details */}
           <div>
+
+            {/* {weather info} */}
             <motion.div
               className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6"
               initial={{ opacity: 0, y: 20 }}
@@ -507,8 +483,7 @@ const Home = ({ language, setLanguage }) => {
                   : dashboardData.mostAffectedArea}
               </p>
 
-              {/* Search Bar */}
-              <SearchBar placeholder_input="Entr Specific City Name" onLocationFound={handleLocationSearch} />
+
               {/* Full Location Text */}
               {searchedLocationDetails && (
                 <p className="text-center text-sm text-gray-600 dark:text-gray-300 mb-4">
@@ -596,6 +571,59 @@ const Home = ({ language, setLanguage }) => {
                 </div>
               </motion.div>
             )}
+
+            {/* Info Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 mt-5 mb-2">
+              {loading ? (
+                <div className="col-span-full flex justify-center items-center py-8">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-300">
+                      {t.loadingData}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* <InfoCard
+                    title={t.disastersDetected}
+                    value={dashboardData.disastersDetected}
+                    icon={AlertTriangle}
+                    color="red"
+                  /> */}
+                  {/* <InfoCard
+                    title={t.avgIntensity}
+                    value={dashboardData.avgIntensity}
+                    icon={TrendingUp}
+                    color="orange"
+                  /> */}
+                  <InfoCard
+                    title={"Most Recent"}
+                    value={dashboardData.mostAffectedArea}
+                    icon={MapPin}
+                    color="yellow"
+                  />
+                  {/* <InfoCard
+                title={t.alertsToday}
+                value={dashboardData.alertsToday}
+                icon={Bell}
+                color="purple"
+              /> */}
+                  {/* New InfoCard for Nearby Disasters */}
+                  <InfoCard
+                    title={t.nearbyDisasterAlert}
+                    value={
+                      nearbyDisasters.length > 0
+                        ? `${nearbyDisasters.length} disaster(s) nearby!`
+                        : t.noNearbyDisaster
+                    }
+                    icon={AlertTriangle}
+                    color={nearbyDisasters.length > 0 ? "red" : "green"}
+                  />
+                </>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
