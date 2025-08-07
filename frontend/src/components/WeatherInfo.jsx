@@ -146,6 +146,16 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
     return middayForecast || dailyForecasts[selectedDate][0]
   }, [selectedDate, dailyForecasts])
 
+  const { maxTemp, minTemp } = useMemo(() => {
+    if (!selectedDate || !dailyForecasts[selectedDate]) return { maxTemp: null, minTemp: null }
+    const temps = dailyForecasts[selectedDate].map(i => i.main.temp)
+    return {
+      maxTemp: Math.max(...temps),
+      minTemp: Math.min(...temps),
+    }
+  }, [selectedDate, dailyForecasts])
+
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64 bg-white dark:bg-gray-800 rounded-lg p-6">
@@ -207,7 +217,18 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
               <div>
                 <h3 className="text-2xl font-bold">{forecast.city.name} {isOnline ? "🌐" : "📴"}</h3>
                 <p className="text-lg capitalize">{selectedDayForecast.weather[0].description}</p>
-                <p className="text-3xl font-bold mt-2">{Math.round(selectedDayForecast.main.temp)}°C</p>
+                <p className="text-3xl font-bold mt-2">
+                  {Math.round(selectedDayForecast.main.temp)}°C
+                </p>
+                <p className="text-sm mt-1">
+                  <span className="text-green-100">H: {Math.round(maxTemp)}°C</span> |{" "}
+                  <span className="text-blue-100">L: {Math.round(minTemp)}°C</span>
+                </p>
+                {/* <p className="text-sm mt-1">
+                  Forecast Time: {new Date(selectedDayForecast.dt_txt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p> */} 
+
+
               </div>
               <div className="flex flex-col items-center">
                 <img
@@ -216,6 +237,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
                   className="w-20 h-20"
                 />
                 <p className="text-sm capitalize">{selectedDayForecast.weather[0].main}</p>
+
               </div>
             </div>
           </div>

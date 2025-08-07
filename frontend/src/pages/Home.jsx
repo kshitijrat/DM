@@ -390,7 +390,7 @@ const Home = ({ language, setLanguage }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-20 z-1 bg-white border-2 dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
+              className="mt-5 z-1 bg-white border-2 dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
             >
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
                 {t.safeZones}
@@ -436,7 +436,7 @@ const Home = ({ language, setLanguage }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-20 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
+                className="mt-5 z-1 bg-white dark:bg-gray-800 relative shadow-xl rounded-2xl p-6 overflow-hidden"
               >
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                   Sample Visualization of Safe Zones
@@ -505,12 +505,12 @@ const Home = ({ language, setLanguage }) => {
                 language={language}
               />
               {/* Add this right below WeatherInfo */}
-              {(searchedCoordinates?.latitude || coordinates?.latitude) && (
+              {/* {(searchedCoordinates?.latitude || coordinates?.latitude) && (
                 <FiveDayForecast
                   lat={searchedCoordinates?.latitude || coordinates?.latitude}
                   lon={searchedCoordinates?.longitude || coordinates?.longitude}
                 />
-              )}
+              )} */}
             </motion.div>
 
             {/* Active Disaster Details */}

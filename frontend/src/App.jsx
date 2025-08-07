@@ -19,6 +19,7 @@ import { io } from "socket.io-client";
 import LocationPermissionChecker from "./hooks/LocationPermissionChecker"
 import useGeoTracker from "./hooks/useGeoTracker";
 import { GeoProvider, GeoContext } from "./context/GeoContext";
+import { ThemeContext, ThemeProvider } from "./context/ThemeContext"
 
 const App = () => {
   const [language, setLanguage] = useState("en")
@@ -63,34 +64,34 @@ const App = () => {
   }, []);
 
 
-
-
   return (
     <AuthProvider>
       <NotificationProvider>
         <GeoProvider>
-          <GeoTrackerWrapper /> {/* Ye hook se tracking kar ke context me store karega */}
-          <Router>
-            <ScrollToTop />
-            <div className="flex flex-col min-h-screen">
-              {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
-              <Navbar />
-              <LocationPermissionChecker />
-              <div className="flex-grow pt-16">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/disaster-alerts" element={<DisasterAlerts />} />
-                  <Route path="/seek-resources" element={<SeekResources />} />
-                  <Route path="/provide-resources" element={<ProvideResources />} />
-                  <Route path="/profile" element={<Profile />} />
-                </Routes>
-                <MapIcon />
+          <ThemeProvider>
+            <GeoTrackerWrapper /> {/* Ye hook se tracking kar ke context me store karega */}
+            <Router>
+              <ScrollToTop />
+              <div className="flex flex-col min-h-screen">
+                {/* <ModernNavbar onLanguageChange={handleLanguageChange} /> */}
+                <Navbar />
+                <LocationPermissionChecker />
+                <div className="flex-grow pt-16">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/disaster-alerts" element={<DisasterAlerts />} />
+                    <Route path="/seek-resources" element={<SeekResources />} />
+                    <Route path="/provide-resources" element={<ProvideResources />} />
+                    <Route path="/profile" element={<Profile />} />
+                  </Routes>
+                  <MapIcon />
+                </div>
+                <Footer language={language} />
               </div>
-              <Footer language={language} />
-            </div>
-          </Router>
+            </Router>
+          </ThemeProvider>
         </GeoProvider>
       </NotificationProvider>
     </AuthProvider>

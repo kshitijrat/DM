@@ -23,6 +23,7 @@ const Navbar = ({ language, setLanguage }) => {
   const { setUser, user } = useAuth();
   const navigate = useNavigate();
 
+
   const logout = async () => {
     try {
       await fetch("https://dm-backend-auge.onrender.com/api/logout", {
@@ -77,6 +78,8 @@ const Navbar = ({ language, setLanguage }) => {
     return location.pathname === path
   }
 
+
+
   return (
     <><nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-gray-50 dark:bg-[#0d1117] backdrop-blur-md shadow-md" : "bg-white dark:bg-gray-900"}`}
@@ -128,12 +131,12 @@ const Navbar = ({ language, setLanguage }) => {
 
 
             {/* Dark mode toggle */}
-            <button
+            {/* <button
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               {darkMode ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-gray-600" />}
-            </button>
+            </button> */}
 
             {/* Notificatio icon  */}
             <div className="relative" ref={notifRef}>
@@ -235,10 +238,8 @@ const Navbar = ({ language, setLanguage }) => {
 
           <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between px-4">
-              <div className="flex items-center space-x-4">
-
-
-                {/* Dark mode toggle */}
+              {/* dark mode toogle  */}
+              {/* <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setDarkMode(!darkMode)}
                   className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -249,10 +250,10 @@ const Navbar = ({ language, setLanguage }) => {
                     <Moon size={18} className="text-gray-600 dark:text-gray-300" />
                   )}
                 </button>
-              </div>
+              </div> */}
 
               {/* Notification */}
-              <div className=" relative" ref={notifRef}>
+              <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setIsNotifOpen(!isNotifOpen)}
                   className="p-2 relative rounded-full hover:bg-gray-200"

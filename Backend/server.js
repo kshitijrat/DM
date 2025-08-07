@@ -87,15 +87,27 @@ app.get("/", (req, res) => {
 app.post("/api/sensor-data", (req, res) => {
   const { sensorType, vibration } = req.body;
 
-  if (!sensorType || vibration === undefined) {
-    return res.status(400).json({ error: "sensorType and vibration required" });
+  // Step 1: Validate input types
+  if (typeof sensorType !== 'string' || typeof vibration !== 'number') {
+    console.error("❌ Invalid data received", req.body);
+    return res.status(400).json({ error: "sensorType must be string and vibration must be number" });
   }
+  const timestamp = new Date();
 
-  console.log(`Received IoT data: ${sensorType} vibration=${vibration}`);
-  io.emit("newSensorData", { sensorType, vibration, timestamp: new Date() });
+  // Step 2: Log the received data
+  console.log("✅ Received IoT data:");
+  console.log("   ➤ Sensor Type:", sensorType);
+  console.log("   ➤ Vibration:", vibration);
+  console.log("   ➤ Timestamp:", timestamp.toISOString());
 
-  res.json({ message: "Sensor data received" });
+  // Step 3: Emit data to all connected clients via Socket.IO
+  io.emit("newSensorData", { sensorType, vibration, timestamp });
+
+  // Step 4: Send confirmation to sender
+  res.json({ message: "✅ Sensor data received successfully" });
 });
+
+
 
 app.get("/test", (req, res) => {
   res.json({ msg: "CORS working" });

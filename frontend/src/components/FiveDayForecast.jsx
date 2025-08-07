@@ -80,7 +80,7 @@ const FiveDayForecast = ({ lat, lon }) => {
           {dailyForecasts.map((day) => (
             <Tooltip_cus key={day.date} delayDuration={0}>
               <TooltipTrigger_cus asChild>
-                <div className="min-w-[120px] bg-gray-100 dark:bg-gray-700 p-3 rounded-md text-center cursor-pointer flex-shrink-0">
+                <div className="min-w-[120px] bg-gray-200 dark:bg-gray-700 p-3 rounded-md text-center cursor-pointer flex-shrink-0">
                   <p className="font-medium text-gray-900 dark:text-gray-100">
                     {new Date(day.date).toLocaleDateString(undefined, {
                       weekday: "short",
