@@ -16,7 +16,7 @@ router.post('/notify', async (req, res) => {
       service: 'gmail',
       auth: {
         user: 'kshitijratnawat@gmail.com',
-        pass: 'awau thly nppk peoe'
+        pass: process.env.SMTP_PASS,
       }
     });
 
