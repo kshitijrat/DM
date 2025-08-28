@@ -9,6 +9,7 @@ import InfoCard from "../components/InfoCard"
 import Typed from 'typed.js'
 import SearchBar from "../components/SearchBar"
 import FiveDayForecast from "../components/FiveDayForecast"
+import ContributeAndEarn from "../components/ContributeAndEarn"
 import {
   AlertTriangle,
   Thermometer,
@@ -513,6 +514,8 @@ const Home = ({ language, setLanguage }) => {
               )} */}
             </motion.div>
 
+
+
             {/* Active Disaster Details */}
             {activeDisaster && (
               <motion.div
@@ -621,6 +624,11 @@ const Home = ({ language, setLanguage }) => {
                   />
                 </>
               )}
+            </div>
+
+            {/* Contribution Section */}
+            <div className="p-2">
+              <ContributeAndEarn />
             </div>
 
           </div>
