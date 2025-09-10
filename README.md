@@ -54,7 +54,6 @@ frontend/
 ├── controllers/    # Business logic
 └── server.js       # Main backend entry point
 
-````
 
 ---
 
