@@ -35,7 +35,7 @@ SafeLink provides:
 ---
 
 ## Project Structure
-
+```
 frontend/
 │
 ├── src/
@@ -53,7 +53,7 @@ frontend/
 ├── routes/         # API endpoints
 ├── controllers/    # Business logic
 └── server.js       # Main backend entry point
-
+```
 
 ---
 
