@@ -1,66 +1,208 @@
-# Safe Link – Disaster Management System
+```
+# SafeLink – Disaster Alert & Rescue Recommendation System
 
-**Team ID:** TH1044  
+**Live Demo:** [SafeLink Web App](https://dm-frontend-t8vb.onrender.com/)
 
-## 1. Overview
-Safe Link is a disaster management platform designed to connect affected individuals, rescue teams, and administrators in real-time during emergencies. The system ensures quick alert broadcasting, safe route navigation, and resource coordination, aiming to minimize disaster impact and save lives.
+**Hackathon:** Simhastha Tech Hackathon 2025  
+**Registration ID:** TH1044  
+**Theme:** Safety, Security, and Surveillance  
 
-## 2. Problem & Solution
+---
 
-**Problem Statement:**  
-During natural disasters, communication gaps, lack of real-time data, and uncoordinated rescue operations cause delays in providing help to victims, leading to increased loss of life and property.  
+## Overview
+SafeLink is a real-time, community-driven disaster management platform.  
+It provides instant **location-based disaster alerts**, allows victims to **seek help with one tap**, and connects them with **nearby volunteers and authorities** for rapid rescue and disaster response.
 
-**Solution:**  
-Safe Link provides a centralized platform for real-time disaster alerts, location tracking, resource availability updates, and direct communication between victims and rescue teams. The system uses real-time data and smart alerts to ensure faster, more coordinated responses.  
+---
 
-## 3. Logic & Workflow
+## Problem Statement
+During disasters like floods, earthquakes, or massive gatherings, people face:
+- Lack of **real-time alerts** in affected areas.
+- **No unified system** for reporting and requesting help.
+- Delayed response from authorities and volunteers.
+- **Limited public participation** in emergency response efforts.
 
-Enabling life-saving action during disasters through instant alerts, smart help connectivity, and community-powered volunteering.
+SafeLink addresses these problems by combining **instant alerts, community volunteering, and smart rescue coordination** in a single platform.
 
-In times of disasters like floods, earthquakes, or severe storms, people often face life-threatening challenges due to:
-- Lack of real-time disaster alerts for common users in affected areas  
-- No reliable way to seek immediate help  
-- No unified system to combine weather, earthquake & global disaster data  
-- People don’t get instant help or location-based warnings during emergencies  
-- No centralized platform for reporting, alerting, and seeking help  
-- Absence of a trusted system to connect victims with nearby volunteers  
-- Limited public participation in emergency response efforts  
+---
 
-While many individuals are willing to offer help during crises, there is no platform that allows them to do so effectively — nor one that encourages their participation through recognition or rewards.  
-There is a pressing need for a system that can alert users instantly, allow victims to seek help, and empower volunteers to assist on-ground in real time, making disaster response faster, smarter, and community-driven.  
+## Solution
+SafeLink provides:
+- **Real-Time Disaster Alerts:** Alerts based on user location using APIs and IoT sensors.
+- **One-Tap SOS Requests:** Victims can raise distress signals instantly, even in low-network areas.
+- **Volunteer Assistance:** Connects victims with nearby volunteers who can provide immediate help.
+- **Interactive Map:** Shows safe zones, danger zones, and live tracking.
 
-**Workflow Steps:**  
+---
 
-- **Data Collection:**  
-  - Real-time incident reports from users  
-  - Disaster data from APIs (weather, earthquake, and global alerts)  
+## Project Structure
+```
 
-- **Processing:**  
-  - Backend verifies reports and triggers alerts to nearby users  
-  - Calculates safe evacuation routes and resource availability  
-  - Matches victims with nearby volunteers for faster on-ground support  
+frontend/
+│
+├── src/
+│   ├── app/            # Layout and main routing
+│   ├── components/     # Reusable UI and logic components
+│   │   └── ui/         # ShadCN UI elements
+│   ├── context/        # Context APIs for global state
+│   ├── hooks/          # Custom React hooks
+│   ├── pages/          # Main application pages
+│   ├── public/         # Static assets
+│   └── styles/         # Global stylesheets
+│
+└── backend/
+├── models/         # MongoDB schemas
+├── routes/         # API endpoints
+├── controllers/    # Business logic
+└── server.js       # Main backend entry point
 
-- **Output:**  
-  - Instant location-based disaster alerts  
-  - Safe routes and evacuation guidance  
-  - Volunteer connection details for help delivery  
+````
 
-- **User Side:**  
-  - **Seek Help:** Victims can request assistance with one tap, even in low connectivity zones  
-  - **Become Volunteer:** Users can register as volunteers and receive requests from nearby victims  
+---
 
-## 4. Tech Stack
-- **Programming Language:** JavaScript  
-- **Frontend:** React.js, Tailwind CSS, Redux Toolkit  
-- **Backend:** Node.js, Express.js, Socket.io (real-time communication)  
-- **Database:** MongoDB (Mongoose)  
-- **Others:** Axios, Nodemailer, JWT Authentication, dotenv  
+## Tech Stack
+| Layer          | Technology |
+|----------------|------------|
+| **Frontend**   | React.js, Context API, Leaflet.js, ShadCN UI |
+| **Backend**    | Node.js, Express.js, Socket.io |
+| **Database**   | MongoDB |
+| **APIs**       | OpenWeatherMap, USGS Earthquake, ReliefWeb, Geolocation |
+| **IoT Sensors**| Real-time disaster and environmental data |
+| **Hosting**    | Render |
 
-## 5. Future Scope
-The prototype can be scaled with:  
-- AI-based disaster prediction & analytics  
-- Mobile app integration for broader reach  
-- Multi-language support for inclusivity  
-- Integration with IoT sensors for real-time ground data  
-- Offline & SMS support for critical alerts  
-- Gamified volunteering for better engagement  
+---
+
+## APIs Used
+| API                | Purpose |
+|--------------------|---------|
+| OpenWeatherMap     | Weather and storm data |
+| USGS Earthquake API| Earthquake detection and magnitude tracking |
+| ReliefWeb API      | Global disaster and humanitarian updates |
+| Geolocation API    | Fetch user location to send relevant alerts |
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/SafeLink.git
+cd SafeLink
+````
+
+---
+
+### 2. Backend Setup
+
+Navigate to the backend folder:
+
+```bash
+cd backend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file inside the `backend/` folder:
+
+```env
+MONGO_URI=your-mongodb-connection-string
+PORT=5000
+```
+
+Run the backend server:
+
+```bash
+npm run dev
+```
+
+Backend will run at: **[http://localhost:5000](http://localhost:5000)**
+
+---
+
+### 3. Frontend Setup
+
+Open a new terminal window and navigate to the frontend folder:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Frontend will run at: **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## Live Deployment
+
+The project is deployed and accessible here:
+**[https://dm-frontend-t8vb.onrender.com/](https://dm-frontend-t8vb.onrender.com/)**
+
+---
+
+## Features
+
+* Real-time disaster alerts based on user location.
+* Interactive map displaying safe zones and danger zones.
+* SOS button for victims to raise emergency help requests.
+* Volunteer mode for people willing to assist victims nearby.
+* Live visualizations and analytics for disasters and IoT data.
+
+---
+
+## Logic & Workflow
+
+| Stage               | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| **Data Collection** | Data gathered from IoT sensors and external APIs.               |
+| **Processing**      | Node.js backend processes and stores data in MongoDB.           |
+| **Output**          | Real-time alerts sent via WebSockets.                           |
+| **User Side**       | Victims and volunteers interact through the React.js interface. |
+| **Admin Side**      | Dashboard for authorities to monitor and respond to incidents.  |
+
+---
+
+## Future Scope
+
+* AI-driven disaster prediction algorithms.
+* Offline mode for low or no internet areas.
+* Gamified volunteer rewards using blockchain.
+
+---
+
+## Team
+
+* **Priya Sharma** – Frontend Developer
+* **Kshitij Ratnawat** – Backend Developer
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
+
+---
+
+## Links
+
+* **Live Project:** [SafeLink Web App](https://dm-frontend-t8vb.onrender.com/)
+* **Hackathon Theme:** Safety, Security, and Surveillance
+* **GitHub Repository:** [GitHub Repositorylink here](https://github.com/kshitijrat/DM.git)
+
+```
+
+---
