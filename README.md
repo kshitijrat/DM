@@ -1,4 +1,3 @@
-```
 # SafeLink – Disaster Alert & Rescue Recommendation System
 
 **Live Demo:** [SafeLink Web App](https://dm-frontend-t8vb.onrender.com/)
@@ -36,7 +35,6 @@ SafeLink provides:
 ---
 
 ## Project Structure
-```
 
 frontend/
 │
