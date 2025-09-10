@@ -36,6 +36,7 @@ SafeLink provides:
 
 ## Project Structure
 ```
+
 frontend/
 │
 ├── src/
@@ -69,23 +70,88 @@ frontend/
 
 ---
 
-## APIs Used
-| API                | Purpose |
-|--------------------|---------|
-| OpenWeatherMap     | Weather and storm data |
-| USGS Earthquake API| Earthquake detection and magnitude tracking |
-| ReliefWeb API      | Global disaster and humanitarian updates |
-| Geolocation API    | Fetch user location to send relevant alerts |
+## Frontend Dependencies and Usage
+
+| Package                     | Purpose |
+|-----------------------------|---------|
+| **react** / **react-dom**   | Core React library for UI development |
+| **react-router-dom**        | Routing and navigation |
+| **tailwindcss** / **@tailwindcss/vite** | Styling and responsive design |
+| **leaflet** / **react-leaflet** | Displaying maps and geo-data |
+| **leaflet-routing-machine** | Route drawing between two points on map |
+| **axios**                   | API requests to backend and external APIs |
+| **socket.io-client**        | Real-time communication with backend |
+| **react-icons** / **lucide-react** | Icons for UI |
+| **framer-motion**           | Smooth animations and transitions |
+| **typed.js**                | Typing effect for text |
+| **react-hot-toast**         | Notifications and alerts in UI |
+| **react-chartjs-2**         | Charts for data visualization |
+| **@react-google-maps/api**  | Google Maps integration |
+| **@headlessui/react**       | Accessible UI components like modals, dialogs |
+| **@radix-ui/react-***       | Advanced UI primitives |
+| **country-flag-icons**      | Display country flags dynamically |
+
+---
+
+## Backend Dependencies and Usage
+
+| Package         | Purpose |
+|-----------------|---------|
+| **express**     | Web framework to handle APIs and routes |
+| **mongoose**    | MongoDB object modeling and database connection |
+| **socket.io**   | Real-time event-based communication |
+| **socket.io-client** | Testing socket features locally |
+| **bcryptjs**    | Password hashing for secure authentication |
+| **jsonwebtoken**| Generate and verify JWT tokens for auth |
+| **dotenv**      | Load environment variables securely |
+| **cors**        | Enable cross-origin requests between frontend and backend |
+| **body-parser** | Parse incoming request bodies |
+| **cookie-parser** | Parse cookies for session handling |
+| **axios**       | Fetching external data like APIs |
+| **nodemailer**  | Send email alerts or OTPs |
+| **serialport**  | Communicate with IoT hardware via serial port |
+| **nodemon** *(dev dependency)* | Auto restart backend server during development |
+
+---
+
+## Environment Variables Setup
+
+Create a `.env` file inside **backend/** folder and include the following variables:
+
+```env
+# MongoDB Connection
+MONGO_URI=your_mongo_db_connection_string
+atlas_url=your_mongo_atlas_url
+
+# JWT Secret Key
+JWT_SECRET=your_jwt_secret_key
+
+# Server Port
+PORT=5000
+
+# SMTP Credentials for Nodemailer
+SMTP_PASS=your_google_generated_smtp_password
+
+# Weather and Google Maps API Keys (Frontend Integration)
+REACT_APP_WEATHER_API_KEY=your_openweathermap_api_key
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+````
+
+> **Note:**
+>
+> * Replace the placeholder values with actual keys and credentials.
+> * `REACT_APP_*` variables are specifically used in the **frontend**.
 
 ---
 
 ## Setup Instructions
 
 ### 1. Clone the Repository
+
 ```bash
-git clone https://github.com/your-username/SafeLink.git
-cd SafeLink
-````
+git clone https://github.com/kshitijrat/DM.git
+cd DM
+```
 
 ---
 
@@ -101,13 +167,6 @@ Install dependencies:
 
 ```bash
 npm install
-```
-
-Create a `.env` file inside the `backend/` folder:
-
-```env
-MONGO_URI=your-mongodb-connection-string
-PORT=5000
 ```
 
 Run the backend server:
@@ -178,6 +237,7 @@ The project is deployed and accessible here:
 * AI-driven disaster prediction algorithms.
 * Offline mode for low or no internet areas.
 * Gamified volunteer rewards using blockchain.
+* Mobile app version for wider reach.
 
 ---
 
@@ -198,8 +258,5 @@ This project is licensed under the **MIT License**.
 
 * **Live Project:** [SafeLink Web App](https://dm-frontend-t8vb.onrender.com/)
 * **Hackathon Theme:** Safety, Security, and Surveillance
-* **GitHub Repository:** [GitHub Repositorylink here](https://github.com/kshitijrat/DM.git)
+* **GitHub Repository:** [GitHub Repo](https://github.com/kshitijrat/DM.git)
 
-```
-
----
