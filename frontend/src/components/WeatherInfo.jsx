@@ -56,6 +56,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
     const isCurrentlyOnline = navigator.onLine
     setIsOnline(isCurrentlyOnline)
 
+    // fetch forecast data 
     const fetchForecast = async (lat, lon) => {
       setLoading(true)
       setError(null)
@@ -77,6 +78,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
       }
     }
 
+    // fetch (lat, lon) by city name
     const fetchFromName = async (locationName) => {
       setLoading(true)
       try {
@@ -96,6 +98,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
       }
     }
 
+    // auto location detection
     if (isCurrentlyOnline) {
       if (externalLat != null && externalLon != null) {
         fetchForecast(externalLat, externalLon)
@@ -119,7 +122,7 @@ const WeatherInfo = ({ externalLat, externalLon, externalLocationName, language 
     }
   }, [externalLat, externalLon, externalLocationName, language])
 
-  // Helper to get wind direction from degrees
+  // get wind direction from degrees
   const getWindDirection = (degrees) => {
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     const index = Math.round(degrees / 45) % 8
