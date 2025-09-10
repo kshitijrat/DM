@@ -28,7 +28,6 @@ Thumbs.db
 *.env.local
 .env.development
 .env.test
-.env.*
 
 # Optional: OS-related
 *.swp
